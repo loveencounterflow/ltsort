@@ -1,0 +1,39 @@
+{
+  "name": "ltsort",
+  "version": "1.0.0",
+  "description": "Topological Sort with Support for Levels",
+  "main": "lib/main.js",
+  "scripts": {
+    "build": "gulp build",
+    "test": "npm run build && node lib/tests.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/loveencounterflow/ltsort.git"
+  },
+  "keywords": [
+    "mingkwai",
+    "typesetter",
+    "jizura",
+    "tex",
+    "latex",
+    "luatex",
+    "xetex",
+    "markdown"
+  ],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/loveencounterflow/ltsort/issues"
+  },
+  "homepage": "https://github.com/loveencounterflow/ltsort",
+  "dependencies": {
+    "cnd": "^2.0.3"
+  },
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-coffee": "^2.3.1",
+    "gulp-sourcemaps": "^1.6.0",
+    "guy-test": "^1.1.2"
+  }
+}
