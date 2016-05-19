@@ -24,75 +24,11 @@ test                      = require 'guy-test'
 LTSORT                    = require './main'
 
 
-############################################################################################################
-### This is a mock for the `MK` global normally instantiated by `mingkwai/lib/main.js`. ###
-unless global.MK?
-  require '../../mingkwai'
-  # CND.dir MK
-  # CND.dir MK.TS
-  # global.MK                 = {}
-  # global.MK.TS              = require './main'
-
-
-# #===========================================================================================================
-# # HELPERS
-# #-----------------------------------------------------------------------------------------------------------
-# show_events = ( probe, events ) ->
-#   whisper probe
-#   echo "["
-#   for event in events
-#     echo "    #{JSON.stringify event}"
-#   echo "    ]"
-
-# #-----------------------------------------------------------------------------------------------------------
-# copy_regex_non_global = ( re ) ->
-#   flags = ( if re.ignoreCase then 'i' else '' ) + \
-#           ( if re.multiline  then 'm' else '' ) +
-#           ( if re.sticky     then 'y' else '' )
-#   return new RegExp re.source, flags
-
-# #-----------------------------------------------------------------------------------------------------------
-# list_from_match = ( match ) ->
-#   return null unless match?
-#   R = Array.from match
-#   R.splice 0, 1
-#   return R
-
-# #-----------------------------------------------------------------------------------------------------------
-# match_first = ( patterns, probe ) ->
-#   for pattern in patterns
-#     return R if ( R = probe.match pattern )?
-#   return null
-
-# #-----------------------------------------------------------------------------------------------------------
-# nice_text_rpr = ( text ) ->
-#   ### Ad-hoc method to print out text in a readable, CoffeeScript-compatible, triple-quoted way. Line breaks
-#   (`\\n`) will be shown as line breaks, so texts should not be as spaghettified as they appear with
-#   JSON.stringify (the last line break of a string is, however, always shown in its symbolic form so it
-#   won't get swallowed by the CoffeeScript parser). Code points below U+0020 (space) are shown as
-#   `\\x00`-style escapes, taken up less space than `\u0000` escapes while keeping things explicit. All
-#   double quotes will be prepended with a backslash. ###
-#   R = text
-#   R = R.replace /[\x00-\x09\x0b-\x19]/g, ( $0 ) ->
-#     cid_hex = ( $0.codePointAt 0 ).toString 16
-#     cid_hex = '0' + cid_hex if cid_hex.length is 1
-#     return "\\x#{cid_hex}"
-#   R = R.replace /"/g, '\\"'
-#   R = R.replace /\n$/g, '\\n'
-#   R = '\n"""' + R + '"""'
-#   return R
-
 #===========================================================================================================
 # TESTS
 #-----------------------------------------------------------------------------------------------------------
-@[ "_XXX" ] = ( T, done ) ->
-  done()
-
-#-----------------------------------------------------------------------------------------------------------
-@_demo = ( S ) ->
-  # TS              = CND.TSORT
-  TS              = @
-  graph           = TS.new_graph()
+@[ "sorting" ] = ( T ) ->
+  graph           = LTSORT.new_graph()
   #.........................................................................................................
   elements = [
     [ 'A', 'X', ]
@@ -110,26 +46,187 @@ unless global.MK?
   #.........................................................................................................
   for element in elements
     if CND.isa_text element
-      TS._register graph, element
+      LTSORT.add graph, element
     else
       [ a, b, ] = element
-      TS.add graph, a, '>', b
+      LTSORT.add graph, a, '>', b
   #.........................................................................................................
-  for element in TS.sort graph
+  probe = LTSORT.linearize graph
+  #.........................................................................................................
+  for element in elements
+    continue if CND.isa_text element
+    [ a, b, ] = element
+    T.ok ( a_idx = probe.indexOf a ) >= 0
+    T.ok ( b_idx = probe.indexOf b ) >= 0
+    T.ok a_idx < b_idx
+  #.........................................................................................................
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "existence" ] = ( T ) ->
+  graph           = LTSORT.new_graph()
+  #.........................................................................................................
+  elements = [
+    [ 'A', 'X', ]
+    [ 'B', 'X', ]
+    'F'
+    [ 'X', 'Y', ]
+    [ 'X', 'Z', ]
+    [ 'γ', 'B', ]
+    [ 'Z', 'Ψ', ]
+    # [ 'Ψ', 'Ω', ]
+    [ 'Z', 'Ω', ]
+    [ 'β', 'A', ]
+    [ 'α', 'β', ]
+    ]
+  #.........................................................................................................
+  for element in elements
+    if CND.isa_text element
+      LTSORT.add graph, element
+    else
+      [ a, b, ] = element
+      LTSORT.add graph, a, '>', b
+  #.........................................................................................................
+  for element in elements
+    if CND.isa_text element
+      T.ok LTSORT.has_node graph, element
+    else
+      [ a, b, ] = element
+      T.ok LTSORT.has_node graph, a
+      T.ok LTSORT.has_node graph, b
+  #.........................................................................................................
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "deletion" ] = ( T ) ->
+  graph           = LTSORT.new_graph()
+  #.........................................................................................................
+  elements = [
+    [ 'A', 'X', ]
+    [ 'B', 'X', ]
+    'F'
+    [ 'X', 'Y', ]
+    [ 'X', 'Z', ]
+    ]
+  #.........................................................................................................
+  for element in elements
+    if CND.isa_text element
+      LTSORT.add graph, element
+    else
+      [ a, b, ] = element
+      LTSORT.add graph, a, '>', b
+  #.........................................................................................................
+  T.ok LTSORT.has_node graph, 'A'
+  LTSORT.delete graph, 'A'
+  T.ok not LTSORT.has_node graph, 'A'
+  #.........................................................................................................
+  T.throws "unknown node 'XXX'", ( => LTSORT.delete graph, 'XXX' )
+  T.throws "unable to remove non-root node 'X'", ( => LTSORT.delete graph, 'X' )
+  #.........................................................................................................
+  T.ok LTSORT.has_node graph, 'B'
+  LTSORT.delete graph, 'B'
+  T.ok not LTSORT.has_node graph, 'B'
+  #.........................................................................................................
+  T.ok LTSORT.has_node graph, 'X'
+  LTSORT.delete graph, 'X'
+  T.ok not LTSORT.has_node graph, 'X'
+  #.........................................................................................................
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "root nodes, lone nodes (1)" ] = ( T ) ->
+  #.........................................................................................................
+  elements = [
+    [ 'A', 'X', ]
+    [ 'B', 'X', ]
+    'F'
+    [ 'X', 'Y', ]
+    [ 'X', 'Z', ]
+    ]
+  #.........................................................................................................
+  graph = LTSORT.new_graph()
+  #.........................................................................................................
+  for element in elements
+    if CND.isa_text element
+      LTSORT.add graph, element
+    else
+      [ a, b, ] = element
+      LTSORT.add graph, a, '>', b
+  #.........................................................................................................
+  T.eq ( LTSORT.find_root_nodes graph ),        [ 'A', 'B', 'F' ]
+  T.eq ( LTSORT.find_root_nodes graph, true ),  [ 'A', 'B', 'F' ]
+  T.eq ( LTSORT.find_root_nodes graph, false ), [ 'A', 'B' ]
+  T.eq ( LTSORT.find_lone_nodes graph ),        [ 'F' ]
+  #.........................................................................................................
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "root nodes, lone nodes (2)" ] = ( T ) ->
+  #.........................................................................................................
+  elements = [
+    [ 'A', 'X', ]
+    [ 'B', 'X', ]
+    'F'
+    [ 'X', 'Y', ]
+    [ 'X', 'Z', ]
+    ]
+  #.........................................................................................................
+  graph = LTSORT.new_graph loners: no
+  #.........................................................................................................
+  for element in elements
+    if CND.isa_text element
+      LTSORT.add graph, element
+    else
+      [ a, b, ] = element
+      LTSORT.add graph, a, '>', b
+  #.........................................................................................................
+  T.eq ( LTSORT.find_root_nodes graph ),        [ 'A', 'B', ]
+  T.eq ( LTSORT.find_root_nodes graph, true ),  [ 'A', 'B', 'F' ]
+  T.eq ( LTSORT.find_root_nodes graph, false ), [ 'A', 'B' ]
+  T.eq ( LTSORT.find_lone_nodes graph ),        [ 'F' ]
+  #.........................................................................................................
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@_demo = ( S ) ->
+  graph           = LTSORT.new_graph()
+  #.........................................................................................................
+  elements = [
+    [ 'A', 'X', ]
+    [ 'B', 'X', ]
+    'F'
+    [ 'X', 'Y', ]
+    [ 'X', 'Z', ]
+    [ 'γ', 'B', ]
+    [ 'Z', 'Ψ', ]
+    # [ 'Ψ', 'Ω', ]
+    [ 'Z', 'Ω', ]
+    [ 'β', 'A', ]
+    [ 'α', 'β', ]
+    ]
+  #.........................................................................................................
+  for element in elements
+    if CND.isa_text element
+      LTSORT._register graph, element
+    else
+      [ a, b, ] = element
+      LTSORT.add graph, a, '>', b
+  #.........................................................................................................
+  for element in LTSORT.sort graph
     help element
   #.........................................................................................................
   debug graph
-  # help TS._find_root_nodes graph, no
-  if TS.has_nodes graph
-    if ( lone_nodes = TS._find_lone_nodes graph ).length > 0
+  # help LTSORT.find_root_nodes graph, no
+  if LTSORT.has_nodes graph
+    if ( lone_nodes = LTSORT.find_lone_nodes graph ).length > 0
       info CND.rainbow lone_nodes
-      TS._delete graph, lone_node for lone_node in lone_nodes
-  while TS.has_nodes graph
-    root_nodes = TS._find_root_nodes graph
+      LTSORT.delete graph, lone_node for lone_node in lone_nodes
+  while LTSORT.has_nodes graph
+    root_nodes = LTSORT.find_root_nodes graph
     info CND.rainbow root_nodes
-    TS._delete graph, root_node for root_node in root_nodes
-  debug graph
-  CND.dir TS
+    LTSORT.delete graph, root_node for root_node in root_nodes
+  # debug graph
+  # CND.dir LTSORT
   return null
 
 
@@ -151,5 +248,5 @@ unless module.parent?
   # include = []
   # @_prune()
   @_main()
-  @_demo()
+  # @_demo()
 

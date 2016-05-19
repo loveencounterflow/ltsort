@@ -7,7 +7,7 @@ njs_fs                    = require 'fs'
 #...........................................................................................................
 CND                       = require 'cnd'
 rpr                       = CND.rpr
-badge                     = 'scratch'
+badge                     = 'LTSORT'
 log                       = CND.get_logger 'plain',     badge
 info                      = CND.get_logger 'info',      badge
 whisper                   = CND.get_logger 'whisper',   badge
@@ -17,21 +17,9 @@ warn                      = CND.get_logger 'warn',      badge
 help                      = CND.get_logger 'help',      badge
 urge                      = CND.get_logger 'urge',      badge
 echo                      = CND.echo.bind CND
-rainbow                   = CND.rainbow.bind CND
-suspend                   = require 'coffeenode-suspend'
-step                      = suspend.step
-
-
-############################################################################################################
-############################################################################################################
-############################################################################################################
-############################################################################################################
 
 
 ### Adapted from https://github.com/eknkc/tsort ###
-
-#-----------------------------------------------------------------------------------------------------------
-# CND                       = require './main'
 
 
 #-----------------------------------------------------------------------------------------------------------
@@ -41,7 +29,6 @@ step                      = suspend.step
     '~isa':       'CND/tsort-graph'
     'precedents': {}
     'loners':     settings[ 'loners' ] ? yes
-    '%nodes':     null
   return R
 
 #-----------------------------------------------------------------------------------------------------------
@@ -57,10 +44,9 @@ step                      = suspend.step
   return me
 
 #-----------------------------------------------------------------------------------------------------------
-@_delete = ( me, name ) ->
-  throw new Error "unknown node #{rpr name}"       unless ( idx = me[ '%nodes' ].indexOf name ) >= 0
-  throw new Error "unable to remove non-root node" unless me[ 'precedents' ][ name ].length is 0
-  me[ '%nodes' ].splice idx, 1
+@delete = ( me, name ) ->
+  throw new Error "unknown node #{rpr name}"                   unless name of me[ 'precedents' ]
+  throw new Error "unable to remove non-root node #{rpr name}" unless me[ 'precedents' ][ name ].length is 0
   delete me[ 'precedents' ][ name ]
   for consequence, precedences of me[ 'precedents' ]
     for idx in [ precedences.length - 1 .. 0 ] by -1
@@ -69,12 +55,12 @@ step                      = suspend.step
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@_find_root_nodes = ( me, include_lone_nodes = yes ) ->
-  if include_lone_nodes
+@find_root_nodes = ( me, loners = null ) ->
+  if loners ? me[ 'loners' ]
     test = ( name ) => not @_has_precedences me, name
   else
     test = ( name ) => ( not @_has_precedences me, name ) and ( @_is_precedence me, name )
-  return ( name for name in me[ '%nodes' ] when test name )
+  return ( name for name of me[ 'precedents' ] when test name )
 
 #-----------------------------------------------------------------------------------------------------------
 @_has_precedences = ( me, name ) ->
@@ -87,15 +73,19 @@ step                      = suspend.step
   return false
 
 #-----------------------------------------------------------------------------------------------------------
-@_find_lone_nodes = ( me, root_nodes = null ) ->
+@find_lone_nodes = ( me, root_nodes = null ) ->
   R = []
-  for name in ( root_nodes ?= @_find_root_nodes me )
+  for name in ( root_nodes ? @find_root_nodes me, yes )
     R.push name unless @_is_precedence me, name
   return R
 
 #-----------------------------------------------------------------------------------------------------------
+@has_node = ( me, name ) ->
+  return name of me[ 'precedents' ]
+
+#-----------------------------------------------------------------------------------------------------------
 @has_nodes = ( me ) ->
-  return me[ '%nodes' ].length > 0
+  return ( Object.keys me[ 'precedents' ] ).length > 0
 
 #-----------------------------------------------------------------------------------------------------------
 @add = ( me, lhs, relation = null, rhs = null ) ->
@@ -125,7 +115,7 @@ step                      = suspend.step
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@sort = ( me ) ->
+@linearize = ( me ) ->
   ### As given in http://en.wikipedia.org/wiki/Topological_sorting ###
   precedences     = Object.keys me[ 'precedents' ]
   R               = []
@@ -136,64 +126,5 @@ step                      = suspend.step
     @_visit me, R, marks, precedence unless marks[ precedence ]?
   # debug counts
   #.........................................................................................................
-  me[ '%nodes' ] = R
   return R
-
-############################################################################################################
-############################################################################################################
-############################################################################################################
-############################################################################################################
-
-
-
-#-----------------------------------------------------------------------------------------------------------
-@_demo = ( S ) ->
-  # TS              = CND.TSORT
-  TS              = @
-  graph           = TS.new_graph()
-  #.........................................................................................................
-  elements = [
-    [ 'A', 'X', ]
-    [ 'B', 'X', ]
-    'F'
-    [ 'X', 'Y', ]
-    [ 'X', 'Z', ]
-    [ 'γ', 'B', ]
-    [ 'Z', 'Ψ', ]
-    # [ 'Ψ', 'Ω', ]
-    [ 'Z', 'Ω', ]
-    [ 'β', 'A', ]
-    [ 'α', 'β', ]
-    ]
-  #.........................................................................................................
-  for element in elements
-    if CND.isa_text element
-      TS._register graph, element
-    else
-      [ a, b, ] = element
-      TS.add graph, a, '>', b
-  #.........................................................................................................
-  for element in TS.sort graph
-    help element
-  #.........................................................................................................
-  debug graph
-  # help TS._find_root_nodes graph, no
-  if TS.has_nodes graph
-    if ( lone_nodes = TS._find_lone_nodes graph ).length > 0
-      info CND.rainbow lone_nodes
-      TS._delete graph, lone_node for lone_node in lone_nodes
-  while TS.has_nodes graph
-    root_nodes = TS._find_root_nodes graph
-    info CND.rainbow root_nodes
-    TS._delete graph, root_node for root_node in root_nodes
-  debug graph
-  CND.dir TS
-  return null
-
-############################################################################################################
-unless module.parent?
-  @_demo()
-
-
-
 
