@@ -112,7 +112,12 @@ LTSORT.populate graph, elements
 tasks = LTSORT.linearize graph
 ```
 
-`tasks` now equals `[ 'α', 'β', 'A', 'δ', 'B', 'X', 'F', 'Y', 'Z', 'Ψ', 'Ω' ]`
+`tasks` now equals 
+
+```coffee
+[ 'α', 'β', 'A', 'δ', 'B', 'X', 'F', 'Y', 'Z', 'Ψ', 'Ω' ]
+```
+
 (although the exact placement of some nodes such as `F` is not guaranteed). Going
 through the precedence rules given, we can ascertain this result is 'sufficiently
 good' to base a step-by-step procedure upon: 
@@ -123,12 +128,36 @@ good' to base a step-by-step procedure upon:
 * `δ ⇒ B ⇒ X` was specified, and, indeed, `δ`, `B` and `X` appear in that order.
 * &c.
 
-
-
 #### `@group graph, loners = null`
 
-Like `LTSORT.linearize`, but return a list of lists instead.
+Like `LTSORT.linearize`, but return a list of lists instead. Using the same 
+setup as shown above, but using `LTSORT.group` instead of `LTSORT.linearize`:
 
+```coffee
+  tasks = LTSORT.group graph
+```
+
+we get:
+
+```coffee
+  [ [ 'F' ],
+    [ 'δ', 'α' ],
+    [ 'B', 'β' ],
+    [ 'A' ],
+    [ 'X' ],
+    [ 'Y', 'Z' ],
+    [ 'Ψ' ],
+    [ 'Ω' ] ]
+```
+
+Each element in the list represents a number of steps that may be performed
+in parallel (i.e. tasks that are independent of each other). Here we have 
+created the graph with an (implicit) setting `loners: true`, which means 
+that lone tasks are single out and appear in the first (possibly empty) list;
+had we created the graph with `loners: false` (or called `LTSORT.group graph, false`),
+the first groupp of tasks would have become `[ 'F', 'δ', 'α' ]`). Obeserve that
+the ordering of nodes within each group is not defined; it may or may not change when
+nodes and edges are added in a different order.
 
 
 
