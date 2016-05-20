@@ -27,65 +27,71 @@ echo                      = CND.echo.bind CND
   settings ?= {}
   R =
     '~isa':       'CND/tsort-graph'
-    'precedents': {}
+    'precedents': new Map()
     'loners':     settings[ 'loners' ] ? yes
   return R
 
 #-----------------------------------------------------------------------------------------------------------
-@_link = ( me, precedence, consequence ) ->
-  ### TAINT check for trivial errors such as precedence == consequence ###
-  me[ 'precedents' ][ precedence ]?= []
-  ( me[ 'precedents' ][ consequence ]?= [] ).push precedence
+@_link = ( me, precedent, consequent ) ->
+  @_register me, precedent
+  @_register me, consequent
+  ( me[ 'precedents' ].get consequent ).push precedent
   return me
 
 #-----------------------------------------------------------------------------------------------------------
 @_register = ( me, name ) ->
-  me[ 'precedents' ][ name ]?= []
+  me[ 'precedents' ].set name, [] unless ( target = me[ 'precedents' ].get name )?
   return me
 
 #-----------------------------------------------------------------------------------------------------------
+@_get_precedents = ( me, name ) ->
+  unless ( R = me[ 'precedents' ].get name )?
+    throw new Error "unknown node #{rpr name}"
+  return R
+
+#-----------------------------------------------------------------------------------------------------------
 @delete = ( me, name ) ->
-  throw new Error "unknown node #{rpr name}"                   unless name of me[ 'precedents' ]
-  throw new Error "unable to remove non-root node #{rpr name}" unless me[ 'precedents' ][ name ].length is 0
-  delete me[ 'precedents' ][ name ]
-  for consequence, precedences of me[ 'precedents' ]
-    for idx in [ precedences.length - 1 .. 0 ] by -1
-      continue unless precedences[ idx ] is name
-      precedences.splice idx, 1
+  precedents = @_get_precedents me, name
+  throw new Error "unable to remove non-root node #{rpr name}" unless precedents.length is 0
+  me[ 'precedents' ].delete name
+  for precedents in Array.from me[ 'precedents' ].values()
+    for idx in [ precedents.length - 1 .. 0 ] by -1
+      continue unless precedents[ idx ] is name
+      precedents.splice idx, 1
   return null
 
 #-----------------------------------------------------------------------------------------------------------
 @find_root_nodes = ( me, loners = null ) ->
   if loners ? me[ 'loners' ]
-    test = ( name ) => not @_has_precedences me, name
+    test = ( name ) => not @_has_precedents me, name
   else
-    test = ( name ) => ( not @_has_precedences me, name ) and ( @_is_precedence me, name )
-  return ( name for name of me[ 'precedents' ] when test name )
+    test = ( name ) => ( not @_has_precedents me, name ) and ( @_is_precedent me, name )
+  return ( name for name in ( Array.from me[ 'precedents' ].keys() ) when test name )
 
 #-----------------------------------------------------------------------------------------------------------
-@_has_precedences = ( me, name ) ->
-  return me[ 'precedents' ][ name ].length > 0
+@_has_precedents = ( me, name ) ->
+  return ( @_get_precedents me, name ).length > 0
 
 #-----------------------------------------------------------------------------------------------------------
-@_is_precedence = ( me, name ) ->
-  for _, precedences of me[ 'precedents' ]
-    return true if ( precedences.indexOf name ) >= 0
+@_is_precedent = ( me, name ) ->
+  for precedents in Array.from me[ 'precedents' ].values()
+    return true if ( precedents.indexOf name ) >= 0
   return false
 
 #-----------------------------------------------------------------------------------------------------------
 @find_lone_nodes = ( me, root_nodes = null ) ->
   R = []
   for name in ( root_nodes ? @find_root_nodes me, yes )
-    R.push name unless @_is_precedence me, name
+    R.push name unless @_is_precedent me, name
   return R
 
 #-----------------------------------------------------------------------------------------------------------
 @has_node = ( me, name ) ->
-  return name of me[ 'precedents' ]
+  return me[ 'precedents' ].has name
 
 #-----------------------------------------------------------------------------------------------------------
 @has_nodes = ( me ) ->
-  return ( Object.keys me[ 'precedents' ] ).length > 0
+  return me[ 'precedents' ].size > 0
 
 #-----------------------------------------------------------------------------------------------------------
 @add = ( me, lhs, relation = null, rhs = null ) ->
@@ -101,14 +107,13 @@ echo                      = CND.echo.bind CND
 
 #-----------------------------------------------------------------------------------------------------------
 @_visit = ( me, results, marks, name ) ->
-  throw new Error "detected cycle involving node #{CND.rpr name}" if marks[ name ] is 'temp'
+  throw new Error "detected cycle involving node #{rpr name}" if marks[ name ] is 'visiting'
   return null if marks[ name ]?
   #.......................................................................................................
-  marks[ name ] = 'temp'
+  marks[ name ] = 'visiting'
   #.......................................................................................................
-  for sub_name in me[ 'precedents' ][ name ]
-    @_visit me, results, marks, sub_name
-    # urge '2234', name, sub_name
+  for precedent in @_get_precedents me, name
+    @_visit me, results, marks, precedent
   #.......................................................................................................
   marks[ name ] = 'ok'
   results.push name
@@ -117,14 +122,12 @@ echo                      = CND.echo.bind CND
 #-----------------------------------------------------------------------------------------------------------
 @linearize = ( me ) ->
   ### As given in http://en.wikipedia.org/wiki/Topological_sorting ###
-  precedences     = Object.keys me[ 'precedents' ]
+  consequents     = Array.from me[ 'precedents' ].keys()
   R               = []
   marks           = {}
   #.........................................................................................................
-  for precedence in precedences
-    # debug '4432', precedence
-    @_visit me, R, marks, precedence unless marks[ precedence ]?
-  # debug counts
+  for consequent in consequents
+    @_visit me, R, marks, consequent unless marks[ consequent ]?
   #.........................................................................................................
   return R
 
