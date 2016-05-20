@@ -12,14 +12,10 @@
     "url": "https://github.com/loveencounterflow/ltsort.git"
   },
   "keywords": [
-    "mingkwai",
-    "typesetter",
-    "jizura",
-    "tex",
-    "latex",
-    "luatex",
-    "xetex",
-    "markdown"
+    "topological sort",
+    "toposort",
+    "grouped topological sort",
+    "levelled topological sort"
   ],
   "author": "",
   "license": "MIT",
