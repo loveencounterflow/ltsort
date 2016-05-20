@@ -9,7 +9,7 @@ and http://stackoverflow.com/a/5100904*
 
 ## API
 
-## Creation
+### Creation
 
 #### `@new_graph settings`
 
@@ -18,7 +18,7 @@ item `loners`, which should be `true` or `false`; it is only relevant for
 `LTSORT.find_root_nodes` and `LTSORT.group`, for which see below. Alternatively, `settings`
 may be a graph itself, in which case a copy of that graph will be returned.
 
-## Population
+### Population
 
 #### `@add graph, lhs, relation = null, rhs = null`
 
@@ -47,7 +47,7 @@ elements  = [
 LTSORT.populate graph, elements
 ```
 
-## Deletion
+### Deletion
 
 #### `@delete graph, name`
 
@@ -55,7 +55,7 @@ Remove the node identified by `name` from `graph`. Currently, only nodes
 that have no precedents (i.e. root nodes, including unconnected ('lone') nodes)
 may be deleted. This is used by `LTSORT.group`, below.
 
-## Retrieval
+### Retrieval
 
 #### `@has_node graph, name`
 
@@ -83,7 +83,7 @@ depend on nothing else in the graph). If `loners` is given and true, that list w
 include lone nodes; if it is given and false, that list will exclude lone nodes. If
 `loners` is not given, the graph's `loners` property will be used instead.
 
-## Sorting
+### Sorting
 
 #### `@linearize graph`
 
@@ -150,14 +150,15 @@ we get:
     [ 'Ω' ] ]
 ```
 
-Each element in the list represents a number of steps that may be performed
-in parallel (i.e. tasks that are independent of each other). Here we have 
-created the graph with an (implicit) setting `loners: true`, which means 
-that lone tasks are single out and appear in the first (possibly empty) list;
-had we created the graph with `loners: false` (or called `LTSORT.group graph, false`),
-the first groupp of tasks would have become `[ 'F', 'δ', 'α' ]`). Obeserve that
-the ordering of nodes within each group is not defined; it may or may not change when
-nodes and edges are added in a different order.
+Each element in the list represents a number of steps that may be performed in
+parallel (i.e. tasks that are independent of each other). Here we have
+created the graph with an (implicit) setting `loners: true`, which causes
+lone tasks to be singled out as the first (possibly empty) list; had we
+created the graph with `loners: false` (or called `LTSORT.group graph,
+false`), the first groupp of tasks would have become `[ 'F', 'δ', 'α' ]`.
+
+Observe that the ordering of nodes within each group is not defined; it may or
+may not change when nodes and edges are added in a different order.
 
 
 
