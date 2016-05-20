@@ -47,7 +47,7 @@ echo                      = CND.echo.bind CND
       @add me, element
     else
       [ a, b, ] = element
-      @add me, a, '>', b
+      @add me, a, b
   #.........................................................................................................
   return me
 
@@ -118,16 +118,9 @@ echo                      = CND.echo.bind CND
   return me[ 'precedents' ].size > 0
 
 #-----------------------------------------------------------------------------------------------------------
-@add = ( me, lhs, relation = null, rhs = null ) ->
-  switch relation
-    when '>' then return @_link me, lhs, rhs
-    when '<' then return @_link me, rhs, lhs
-    when null
-      throw new Error "no relation given" if rhs?
-      return @_register me, lhs
-    else
-      throw new Error "expected '<' or '>' for relation argument, got #{CND.rpr relation}"
-  return null
+@add = ( me, precedent, consequent = null ) ->
+  return @_link me, precedent, consequent if consequent?
+  return @_register me, precedent
 
 #-----------------------------------------------------------------------------------------------------------
 @_visit = ( me, results, marks, name ) ->
