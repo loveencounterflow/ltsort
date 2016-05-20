@@ -101,7 +101,7 @@ elements  = [
   'F'
   [ 'X', 'Y', ]
   [ 'X', 'Z', ]
-  [ 'γ', 'B', ]
+  [ 'δ', 'B', ]
   [ 'Z', 'Ψ', ]
   [ 'Ψ', 'Ω', ]
   [ 'Z', 'Ω', ]
@@ -112,7 +112,7 @@ LTSORT.populate graph, elements
 tasks = LTSORT.linearize graph
 ```
 
-`tasks` now equals `[ 'α', 'β', 'A', 'γ', 'B', 'X', 'F', 'Y', 'Z', 'Ψ', 'Ω' ]`
+`tasks` now equals `[ 'α', 'β', 'A', 'δ', 'B', 'X', 'F', 'Y', 'Z', 'Ψ', 'Ω' ]`
 (although the exact placement of some nodes such as `F` is not guaranteed). Going
 through the precedence rules given, we can ascertain this result is 'sufficiently
 good' to base a step-by-step procedure upon: 
@@ -120,7 +120,7 @@ good' to base a step-by-step procedure upon:
 * `α ⇒ β` was specified, and, indeed, `α` comes before `β` in the linearization.
 * `A ⇒ X` and `B ⇒ X` were specified, and, indeed, both `A` and `B` come before `X`.
 * Both `Z` and `Y` depend on `X`, and they indeed come after `X`. 
-* `γ ⇒ B ⇒ X` was specified, and, indeed, `γ`, `B` and `X` appear in that order.
+* `δ ⇒ B ⇒ X` was specified, and, indeed, `δ`, `B` and `X` appear in that order.
 * &c.
 
 

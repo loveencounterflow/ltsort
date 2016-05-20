@@ -34,7 +34,7 @@ LTSORT                    = require './main'
     'F'
     [ 'X', 'Y', ]
     [ 'X', 'Z', ]
-    [ 'γ', 'B', ]
+    [ 'δ', 'B', ]
     [ 'Z', 'Ψ', ]
     # [ 'Ψ', 'Ω', ]
     [ 'Z', 'Ω', ]
@@ -228,7 +228,7 @@ LTSORT                    = require './main'
     'F'
     [ 'X', 'Y', ]
     [ 'X', 'Z', ]
-    [ 'γ', 'B', ]
+    [ 'δ', 'B', ]
     [ 'Z', 'Ψ', ]
     [ 'Ψ', 'Ω', ]
     [ 'Z', 'Ω', ]
@@ -238,6 +238,7 @@ LTSORT                    = require './main'
   LTSORT.populate graph, elements
   tasks = LTSORT.linearize graph
   debug '0809', tasks
+  T.eq tasks, [ 'α', 'β', 'A', 'δ', 'B', 'X', 'F', 'Y', 'Z', 'Ψ', 'Ω' ]
   #.........................................................................................................
   return null
 
