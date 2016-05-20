@@ -118,6 +118,10 @@ through the precedence rules given, we can ascertain this result is 'sufficientl
 good' to base a step-by-step procedure upon: 
 
 * `α ⇒ β` was specified, and, indeed, `α` comes before `β` in the linearization.
+* `A ⇒ X` and `B ⇒ X` were specified, and, indeed, both `A` and `B` come before `X`.
+* Both `Z` and `Y` depend on `X`, and they indeed come after `X`. 
+* `γ ⇒ B ⇒ X` was specified, and, indeed, `γ`, `B` and `X` appear in that order.
+* &c.
 
 
 
