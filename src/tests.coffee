@@ -303,6 +303,39 @@ LTSORT                    = require './main'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "demo (4)" ] = ( T ) ->
+  graph     = LTSORT.new_graph loners: no
+  #.........................................................................................................
+  LTSORT.add graph, 'buy books',         'do some reading'
+  LTSORT.add graph, 'buy books',         'go home'
+  LTSORT.add graph, 'buy food',          'cook'
+  LTSORT.add graph, 'buy food',          'go home'
+  LTSORT.add graph, 'buy food',          'have a coffee'
+  LTSORT.add graph, 'cook',              'eat'
+  LTSORT.add graph, 'do some reading',   'go to exam'
+  LTSORT.add graph, 'eat',               'do some reading'
+  LTSORT.add graph, 'eat',               'go to exam'
+  LTSORT.add graph, 'fetch money',       'buy books'
+  LTSORT.add graph, 'fetch money',       'buy food'
+  LTSORT.add graph, 'go home',           'cook'
+  LTSORT.add graph, 'go to bank',        'fetch money'
+  LTSORT.add graph, 'have a coffee',     'go home'
+  #.........................................................................................................
+  tasks = LTSORT.group graph
+  # debug '0809', tasks
+  T.eq tasks, [ [ 'go to bank' ],
+    [ 'fetch money' ],
+    [ 'buy books', 'buy food' ],
+    [ 'have a coffee' ],
+    [ 'go home' ],
+    [ 'cook' ],
+    [ 'eat' ],
+    [ 'do some reading' ],
+    [ 'go to exam' ] ]
+  #.........................................................................................................
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 @_demo = ( S ) ->
   elements  = @_probes[ 'small' ]
   graph     = LTSORT.populate ( LTSORT.new_graph loners: no ), elements

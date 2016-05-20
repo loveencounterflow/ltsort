@@ -7,6 +7,57 @@ and http://stackoverflow.com/a/5100904*
 
 ## Rationale
 
+I needed a way to resolve dependencies, that is, to do a so-called topological
+sort, so I copied code from https://github.com/eknkc/tsort and modified it for
+my needs. Later I realized that doing a levelled (a.k.a. grouped) toposort
+would be very  desirable, but I couldn't find any JavaScript / NodeJS module
+to do just that.  I implemented the ideas given in
+http://stackoverflow.com/a/5100904, and added tests and documentation.
+
+## Example
+
+Creating a graph and populating it with nodes and edges; the node labels
+appear in natural order (`LTSORT.add g, a, b` meaning that `b` depends on `a` having
+been done first):
+
+```coffee
+graph     = LTSORT.new_graph loners: no
+
+LTSORT.add graph, 'buy books',         'do some reading'
+LTSORT.add graph, 'buy books',         'go home'
+LTSORT.add graph, 'buy food',          'cook'
+LTSORT.add graph, 'buy food',          'go home'
+LTSORT.add graph, 'buy food',          'have a coffee'
+LTSORT.add graph, 'cook',              'eat'
+LTSORT.add graph, 'do some reading',   'go to exam'
+LTSORT.add graph, 'eat',               'do some reading'
+LTSORT.add graph, 'eat',               'go to exam'
+LTSORT.add graph, 'fetch money',       'buy books'
+LTSORT.add graph, 'fetch money',       'buy food'
+LTSORT.add graph, 'go home',           'cook'
+LTSORT.add graph, 'go to bank',        'fetch money'
+LTSORT.add graph, 'have a coffee',     'go home'
+tasks = LTSORT.group graph
+```
+
+`tasks` is now a list of lists:
+
+```coffee
+[ [ 'go to bank' ],
+  [ 'fetch money' ],
+  [ 'buy books', 'buy food' ],
+  [ 'have a coffee' ],
+  [ 'go home' ],
+  [ 'cook' ],
+  [ 'eat' ],
+  [ 'do some reading' ],
+  [ 'go to exam' ] ]
+```
+
+which tells me that I'd have to cook before you eat, that I can only buy foods
+and books with some money on my hands, but that buying foods and books can happen in
+any order, and so on.
+
 ## API
 
 ### Creation
@@ -151,16 +202,14 @@ we get:
 ```
 
 Each element in the list represents a number of steps that may be performed in
-parallel (i.e. tasks that are independent of each other). Here we have
-created the graph with an (implicit) setting `loners: true`, which causes
-lone tasks to be singled out as the first (possibly empty) list; had we
+any order or in parallel (i.e. tasks that are independent of each other). Here
+we have created the graph with an (implicit) setting `loners: true`, which
+causes lone tasks to be singled out as the first (possibly empty) list; had we
 created the graph with `loners: false` (or called `LTSORT.group graph,
 false`), the first groupp of tasks would have become `[ 'F', 'δ', 'α' ]`.
 
 Observe that the ordering of nodes within each group is not defined; it may or
 may not change when nodes and edges are added in a different order.
-
-
 
 
 
