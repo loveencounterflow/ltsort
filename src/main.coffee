@@ -81,14 +81,6 @@ echo                      = CND.echo.bind CND
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@find_root_nodes = ( me, loners = null ) ->
-  if loners ? me[ 'loners' ]
-    test = ( name ) => not @_has_precedents me, name
-  else
-    test = ( name ) => ( not @_has_precedents me, name ) and ( @_is_precedent me, name )
-  return ( name for name in ( Array.from me[ 'precedents' ].keys() ) when test name )
-
-#-----------------------------------------------------------------------------------------------------------
 @_has_precedents = ( me, name ) ->
   return ( @_get_precedents me, name ).length > 0
 
@@ -99,11 +91,23 @@ echo                      = CND.echo.bind CND
   return false
 
 #-----------------------------------------------------------------------------------------------------------
+@find_root_nodes = ( me, loners = null ) ->
+  if loners ? me[ 'loners' ]
+    test = ( name ) => not @_has_precedents me, name
+  else
+    test = ( name ) => ( not @_has_precedents me, name ) and ( @_is_precedent me, name )
+  return ( name for name in ( Array.from me[ 'precedents' ].keys() ) when test name )
+
+#-----------------------------------------------------------------------------------------------------------
 @find_lone_nodes = ( me, root_nodes = null ) ->
   R = []
   for name in ( root_nodes ? @find_root_nodes me, yes )
     R.push name unless @_is_precedent me, name
   return R
+
+#-----------------------------------------------------------------------------------------------------------
+@is_lone_node = ( me, name ) ->
+  return ( not @_is_precedent me, name ) and ( not @_has_precedents me, name )
 
 #-----------------------------------------------------------------------------------------------------------
 @has_node = ( me, name ) ->
@@ -151,3 +155,21 @@ echo                      = CND.echo.bind CND
   #.........................................................................................................
   return R
 
+#-----------------------------------------------------------------------------------------------------------
+@group = ( me, loners = null ) ->
+  you     = @new_graph me
+  loners  = loners ? me[ 'loners' ]
+  R       = []
+  #.........................................................................................................
+  if loners
+    if @has_nodes you
+      lone_nodes = @find_lone_nodes you
+      R.push lone_nodes
+      @delete you, lone_node for lone_node in lone_nodes
+  #.........................................................................................................
+  while @has_nodes you
+    root_nodes = @find_root_nodes you, yes
+    R.push root_nodes
+    @delete you, root_node for root_node in root_nodes
+  #.........................................................................................................
+  return R

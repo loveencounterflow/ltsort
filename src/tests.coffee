@@ -129,13 +129,6 @@ LTSORT                    = require './main'
   elements  = @_probes[ 'small' ]
   graph     = LTSORT.populate ( LTSORT.new_graph loners: no ), elements
   #.........................................................................................................
-  for element in elements
-    if CND.isa_text element
-      LTSORT.add graph, element
-    else
-      [ a, b, ] = element
-      LTSORT.add graph, a, '>', b
-  #.........................................................................................................
   T.eq ( LTSORT.find_root_nodes graph ),        [ 'A', 'B', ]
   T.eq ( LTSORT.find_root_nodes graph, true ),  [ 'A', 'B', 'F' ]
   T.eq ( LTSORT.find_root_nodes graph, false ), [ 'A', 'B' ]
@@ -143,13 +136,16 @@ LTSORT                    = require './main'
   #.........................................................................................................
   return null
 
-
 #-----------------------------------------------------------------------------------------------------------
-@[ "copy existing graph" ] = ( T ) ->
+@[ "copy (1)" ] = ( T ) ->
   elements  = @_probes[ 'small' ]
   graph_0   = LTSORT.populate ( LTSORT.new_graph loners: no ), elements
   graph_1   = LTSORT.new_graph graph_0
   #.........................................................................................................
+  T.eq graph_0[ 'loners' ], graph_1[ 'loners' ]
+  T.ok graph_0 isnt graph_1
+  T.ok LTSORT.has_nodes graph_0
+  T.ok LTSORT.has_nodes graph_1
   for [ name_0, precedents_0, ] in Array.from graph_0[ 'precedents' ].entries()
     precedents_1 = graph_1[ 'precedents' ].get name_0
     T.ok precedents_0 isnt precedents_1
@@ -158,29 +154,75 @@ LTSORT                    = require './main'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "copy (2)" ] = ( T ) ->
+  elements  = @_probes[ 'small' ]
+  graph_0   = LTSORT.populate ( LTSORT.new_graph loners: yes ), elements
+  graph_1   = LTSORT.new_graph graph_0
+  #.........................................................................................................
+  T.eq graph_0[ 'loners' ], graph_1[ 'loners' ]
+  T.ok graph_0 isnt graph_1
+  T.ok LTSORT.has_nodes graph_0
+  T.ok LTSORT.has_nodes graph_1
+  for [ name_0, precedents_0, ] in Array.from graph_0[ 'precedents' ].entries()
+    precedents_1 = graph_1[ 'precedents' ].get name_0
+    T.ok precedents_0 isnt precedents_1
+    T.eq precedents_0, precedents_1
+  #.........................................................................................................
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "group (1)" ] = ( T ) ->
+  elements  = @_probes[ 'small' ]
+  graph     = LTSORT.populate ( LTSORT.new_graph loners: no ), elements
+  #.........................................................................................................
+  T.eq ( LTSORT.group graph ), [ [ 'A', 'B', 'F' ], [ 'X' ], [ 'Y', 'Z' ] ]
+  #.........................................................................................................
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "group (2)" ] = ( T ) ->
+  elements  = @_probes[ 'small' ]
+  graph     = LTSORT.populate ( LTSORT.new_graph loners: yes ), elements
+  #.........................................................................................................
+  T.eq ( LTSORT.group graph ), [ [ 'F' ], [ 'A', 'B' ], [ 'X' ], [ 'Y', 'Z' ] ]
+  #.........................................................................................................
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "group (3)" ] = ( T ) ->
+  elements  = @_probes[ 'small' ]
+  graph     = LTSORT.populate ( LTSORT.new_graph loners: no ), elements
+  #.........................................................................................................
+  LTSORT.delete graph, 'F'
+  T.eq ( LTSORT.group graph ), [ [ 'A', 'B', ], [ 'X' ], [ 'Y', 'Z' ] ]
+  #.........................................................................................................
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "group (4)" ] = ( T ) ->
+  elements  = @_probes[ 'small' ]
+  graph     = LTSORT.populate ( LTSORT.new_graph loners: yes ), elements
+  LTSORT.delete graph, 'F'
+  #.........................................................................................................
+  T.eq ( LTSORT.group graph ), [ [], [ 'A', 'B' ], [ 'X' ], [ 'Y', 'Z' ] ]
+  #.........................................................................................................
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "test for lone node" ] = ( T ) ->
+  elements  = @_probes[ 'small' ]
+  graph     = LTSORT.populate ( LTSORT.new_graph loners: yes ), elements
+  #.........................................................................................................
+  T.eq ( LTSORT.is_lone_node graph, 'F' ), true
+  T.eq ( LTSORT.is_lone_node graph, 'A' ), false
+  T.throws "unknown node 'XXX'", ( => LTSORT.is_lone_node graph, 'XXX' )
+  #.........................................................................................................
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 @_demo = ( S ) ->
-  graph           = LTSORT.new_graph()
-  #.........................................................................................................
-  elements = [
-    [ 'A', 'X', ]
-    [ 'B', 'X', ]
-    'F'
-    [ 'X', 'Y', ]
-    [ 'X', 'Z', ]
-    [ 'γ', 'B', ]
-    [ 'Z', 'Ψ', ]
-    # [ 'Ψ', 'Ω', ]
-    [ 'Z', 'Ω', ]
-    [ 'β', 'A', ]
-    [ 'α', 'β', ]
-    ]
-  #.........................................................................................................
-  for element in elements
-    if CND.isa_text element
-      LTSORT._register graph, element
-    else
-      [ a, b, ] = element
-      LTSORT.add graph, a, '>', b
+  elements  = @_probes[ 'small' ]
+  graph     = LTSORT.populate ( LTSORT.new_graph loners: no ), elements
   #.........................................................................................................
   for element in LTSORT.linearize graph
     help element
@@ -217,6 +259,6 @@ LTSORT                    = require './main'
 unless module.parent?
   # include = []
   # @_prune()
-  @_demo()
+  # @_demo()
   @_main()
 
