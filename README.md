@@ -21,7 +21,9 @@ appear in natural order (`LTSORT.add g, a, b` meaning that `b` depends on `a` ha
 been done first):
 
 ```coffee
-graph     = LTSORT.new_graph loners: no
+LTSORT = require 'ltsort'
+
+graph = LTSORT.new_graph loners: no
 
 LTSORT.add graph, 'buy books',         'do some reading'
 LTSORT.add graph, 'buy books',         'go home'
@@ -37,6 +39,7 @@ LTSORT.add graph, 'fetch money',       'buy food'
 LTSORT.add graph, 'go home',           'cook'
 LTSORT.add graph, 'go to bank',        'fetch money'
 LTSORT.add graph, 'have a coffee',     'go home'
+
 tasks = LTSORT.group graph
 ```
 
@@ -206,10 +209,14 @@ any order or in parallel (i.e. tasks that are independent of each other). Here
 we have created the graph with an (implicit) setting `loners: true`, which
 causes lone tasks to be singled out as the first (possibly empty) list; had we
 created the graph with `loners: false` (or called `LTSORT.group graph,
-false`), the first groupp of tasks would have become `[ 'F', 'δ', 'α' ]`.
+false`), the first group of tasks would have become `[ 'F', 'δ', 'α' ]`.
 
-Observe that the ordering of nodes within each group is not defined; it may or
-may not change when nodes and edges are added in a different order.
+Observe that **(1)** the ordering of nodes within each group is not defined;
+it may or may not change when nodes and edges are added in a different order;
+**(2)** tasks appear as soon as possible in the listing, meaning that there's
+a chance that a given task could be accomplished later than indicated here. As
+with `LTSORT.linearize`, the result given is just one possible solution to
+the constraints given, and not necessarily the only one.
 
 
 
