@@ -59,33 +59,71 @@ may be deleted. This is used by `LTSORT.group`, below.
 
 #### `@has_node graph, name`
 
-XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX 
+Return whether `graph` has a node labelled with `name`.
 
 #### `@has_nodes graph`
 
-XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX 
+Return whether `graph` has any nodes at all.
+
 
 #### `@is_lone_node graph, name`
 
-XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX 
+Return whether the node labelled `name` is a 'lone' node (i.e. one without precedents
+and without consequents; a node that is not part of any edge). Will throw an error
+if `graph` doesn't have a node labelled `name`.
 
 #### `@find_lone_nodes graph, root_nodes = null`
 
-XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX 
+Return a list of all lone nodes in the graph.
 
 #### `@find_root_nodes graph, loners = null`
 
-XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX 
+Return a list of all root nodes in the graph (i.e. those nodes that have no precedents /
+depend on nothing else in the graph). If `loners` is given and true, that list will
+include lone nodes; if it is given and false, that list will exclude lone nodes. If
+`loners` is not given, the graph's `loners` property will be used instead.
 
 ## Sorting
 
-#### `@group graph, loners = null`
-
-XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX 
-
 #### `@linearize graph`
 
-XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX 
+Return a list with node labels, ordered such that all consequents come after their
+precedents. In other words, in a graph where edges represent dependencies and
+where a given task `y` depends on task `x` having been finished, its
+linearization will spell out one way in which to perform actions such that all
+prerequisites `x` come before any of their dependent tasks `y`. For example:
+
+```coffee
+graph     = LTSORT.new_graph()
+elements  = [
+  [ 'A', 'X', ]
+  [ 'B', 'X', ]
+  'F'
+  [ 'X', 'Y', ]
+  [ 'X', 'Z', ]
+  [ 'γ', 'B', ]
+  [ 'Z', 'Ψ', ]
+  [ 'Ψ', 'Ω', ]
+  [ 'Z', 'Ω', ]
+  [ 'β', 'A', ]
+  [ 'α', 'β', ]
+  ]
+LTSORT.populate graph, elements
+tasks = LTSORT.linearize graph
+```
+
+`tasks` now equals `[ 'α', 'β', 'A', 'γ', 'B', 'X', 'F', 'Y', 'Z', 'Ψ', 'Ω' ]`
+(although the exact placement of some nodes such as `F` is not guaranteed). Going
+through the precedence rules given, we can ascertain this result is 'sufficiently
+good' to base a step-by-step procedure upon: 
+
+* `α ⇒ β` was specified, and, indeed, `α` comes before `β` in the linearization.
+
+
+
+#### `@group graph, loners = null`
+
+Like `LTSORT.linearize`, but return a list of lists instead.
 
 
 

@@ -220,6 +220,28 @@ LTSORT                    = require './main'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "example ()" ] = ( T ) ->
+  graph     = LTSORT.new_graph()
+  elements  = [
+    [ 'A', 'X', ]
+    [ 'B', 'X', ]
+    'F'
+    [ 'X', 'Y', ]
+    [ 'X', 'Z', ]
+    [ 'γ', 'B', ]
+    [ 'Z', 'Ψ', ]
+    [ 'Ψ', 'Ω', ]
+    [ 'Z', 'Ω', ]
+    [ 'β', 'A', ]
+    [ 'α', 'β', ]
+    ]
+  LTSORT.populate graph, elements
+  tasks = LTSORT.linearize graph
+  debug '0809', tasks
+  #.........................................................................................................
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 @_demo = ( S ) ->
   elements  = @_probes[ 'small' ]
   graph     = LTSORT.populate ( LTSORT.new_graph loners: no ), elements
