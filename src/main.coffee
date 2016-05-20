@@ -24,12 +24,32 @@ echo                      = CND.echo.bind CND
 
 #-----------------------------------------------------------------------------------------------------------
 @new_graph = ( settings ) ->
+  return @_copy settings if CND.isa settings, 'LTSORT/graph'
   settings ?= {}
   R =
-    '~isa':       'CND/tsort-graph'
+    '~isa':       'LTSORT/graph'
     'precedents': new Map()
     'loners':     settings[ 'loners' ] ? yes
   return R
+
+#-----------------------------------------------------------------------------------------------------------
+@_copy = ( me ) ->
+  R = @new_graph { loners: me[ 'loners' ], }
+  for [ name, precedents, ] in Array.from me[ 'precedents' ].entries()
+    R[ 'precedents' ].set name, ( precedent for precedent in precedents )
+  return R
+
+#-----------------------------------------------------------------------------------------------------------
+@populate = ( me, elements ) ->
+  #.........................................................................................................
+  for element in elements
+    if CND.isa_text element
+      @add me, element
+    else
+      [ a, b, ] = element
+      @add me, a, '>', b
+  #.........................................................................................................
+  return me
 
 #-----------------------------------------------------------------------------------------------------------
 @_link = ( me, precedent, consequent ) ->
