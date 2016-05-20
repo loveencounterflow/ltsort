@@ -212,7 +212,7 @@ LTSORT                    = require './main'
       [ a, b, ] = element
       LTSORT.add graph, a, '>', b
   #.........................................................................................................
-  for element in LTSORT.sort graph
+  for element in LTSORT.linearize graph
     help element
   #.........................................................................................................
   debug graph
@@ -247,6 +247,6 @@ LTSORT                    = require './main'
 unless module.parent?
   # include = []
   # @_prune()
+  @_demo()
   @_main()
-  # @_demo()
 
