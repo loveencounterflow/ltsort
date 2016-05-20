@@ -2,6 +2,9 @@
 
 # LTSort
 
+*With inspiration from https://github.com/eknkc/tsort
+and http://stackoverflow.com/a/5100904* 
+
 ## Rationale
 
 ## API
