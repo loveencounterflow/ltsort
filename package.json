@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/loveencounterflow/ltsort",
   "dependencies": {
-    "cnd": "^2.0.3"
+    "cnd": "^3.0.1"
   },
   "devDependencies": {
     "gulp": "^3.9.1",
