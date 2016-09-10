@@ -335,6 +335,54 @@ LTSORT                    = require './main'
   #.........................................................................................................
   return null
 
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "using precedents, actions, and consequents" ] = ( T ) ->
+  graph     = LTSORT.new_graph loners: no
+  #.........................................................................................................
+  LTSORT.add graph, 'is-no-books',            'do-buy-books'
+  LTSORT.add graph, 'do-buy-books',           'is-have-books'
+  LTSORT.add graph, 'is-have-books',          'do-some-reading'
+  LTSORT.add graph, 'is-have-no-knowledge',   'do-some-reading'
+  LTSORT.add graph, 'do-some-reading',        'is-have-knowledge'
+  LTSORT.add graph, 'is-have-knowledge',      'do-go-exam'
+  LTSORT.add graph, 'is-have-books',          'do-go-home'
+  LTSORT.add graph, 'is-hungry',              'do-eat'
+  LTSORT.add graph, 'do-eat',                 'is-not-hungry'
+  LTSORT.add graph, 'do-cook',                'do-eat'
+  LTSORT.add graph, 'do-have-food',           'do-eat'
+  LTSORT.add graph, 'do-eat',                 'is-have-no-food-again'
+  LTSORT.add graph, 'is-have-no-food',        'do-buy-food'
+  LTSORT.add graph, 'do-buy-food',            'is-have-food'
+  # LTSORT.add graph, 'do-go-exam',             'is-not-at-home'
+  # LTSORT.add graph, 'buy food',          'cook'
+  # LTSORT.add graph, 'buy food',          'go home'
+  # LTSORT.add graph, 'buy food',          'have a coffee'
+  # LTSORT.add graph, 'cook',              'eat'
+  # LTSORT.add graph, 'do some reading',   'go to exam'
+  # LTSORT.add graph, 'eat',               'do some reading'
+  # LTSORT.add graph, 'eat',               'go to exam'
+  # LTSORT.add graph, 'fetch money',       'buy books'
+  # LTSORT.add graph, 'fetch money',       'buy food'
+  # LTSORT.add graph, 'go home',           'cook'
+  # LTSORT.add graph, 'go to bank',        'fetch money'
+  # LTSORT.add graph, 'have a coffee',     'go home'
+  #.........................................................................................................
+  # tasks = LTSORT.group graph
+  tasks = LTSORT.linearize graph
+  debug '0809', tasks
+  # T.eq tasks, [ [ 'go to bank' ],
+  #   [ 'fetch money' ],
+  #   [ 'buy books', 'buy food' ],
+  #   [ 'have a coffee' ],
+  #   [ 'go home' ],
+  #   [ 'cook' ],
+  #   [ 'eat' ],
+  #   [ 'do some reading' ],
+  #   [ 'go to exam' ] ]
+  #.........................................................................................................
+  return null
+
 #-----------------------------------------------------------------------------------------------------------
 @_demo = ( S ) ->
   elements  = @_probes[ 'small' ]
@@ -373,8 +421,10 @@ LTSORT                    = require './main'
 
 ############################################################################################################
 unless module.parent?
-  # include = []
+  include = [
+    "using precedents, actions, and consequents"
+    ]
   # @_prune()
   # @_demo()
-  CND.dir LTSORT
+  # CND.dir LTSORT
   @_main()
