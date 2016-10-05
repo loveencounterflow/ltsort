@@ -384,7 +384,43 @@ LTSORT                    = require './main'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@_demo = ( S ) ->
+@[ "cycle detection (1)" ] = ( T, done ) ->
+  graph = LTSORT.new_graph loners: no
+  #.........................................................................................................
+  LTSORT.add graph, 'A', 'B'
+  LTSORT.linearize graph
+  LTSORT.add graph, 'B', 'C'
+  LTSORT.linearize graph
+  LTSORT.add graph, 'C', 'D'
+  LTSORT.linearize graph
+  LTSORT.add graph, 'D', 'E'
+  LTSORT.linearize graph
+  LTSORT.add graph, 'E', 'A'
+  #.........................................................................................................
+  T.throws "detected cycle involving node 'A'", -> urge LTSORT.linearize graph
+  done()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "cycle detection (2)" ] = ( T, done ) ->
+  graph = LTSORT.new_graph loners: no
+  #.........................................................................................................
+  LTSORT.add graph, 'A', 'B'
+  LTSORT.linearize graph
+  LTSORT.add graph, 'B', 'C'
+  LTSORT.linearize graph
+  LTSORT.add graph, 'C', 'D'
+  LTSORT.linearize graph
+  LTSORT.add graph, 'D', 'E'
+  LTSORT.linearize graph
+  LTSORT.add graph, 'E', 'A'
+  #.........................................................................................................
+  T.throws "detected cycle involving node 'A'", -> urge LTSORT.group graph
+  done()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
+@demo = ( T ) ->
   elements  = @_probes[ 'small' ]
   graph     = LTSORT.populate ( LTSORT.new_graph loners: no ), elements
   #.........................................................................................................
@@ -419,12 +455,38 @@ LTSORT                    = require './main'
     delete @[ name ] unless name in include
   return null
 
+
 ############################################################################################################
 unless module.parent?
   include = [
-    "using precedents, actions, and consequents"
+    # "demo",
+    "sorting",
+    "existence",
+    "deletion",
+    "root nodes, lone nodes (1)",
+    "root nodes, lone nodes (2)",
+    "copy (1)",
+    "copy (2)",
+    "group (1)",
+    "group (2)",
+    "group (3)",
+    "group (4)",
+    "test for lone node",
+    "demo (1)",
+    "demo (2)",
+    "demo (3)",
+    "demo (4)",
+    "using precedents, actions, and consequents",
+    "cycle detection (1)",
+    "cycle detection (2)",
     ]
-  # @_prune()
-  # @_demo()
-  # CND.dir LTSORT
+
+  @_prune()
   @_main()
+
+  # debug '\n' + JSON.stringify ( Object.keys @ ), null, '  '
+
+
+
+
+

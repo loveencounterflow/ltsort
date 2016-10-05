@@ -150,6 +150,7 @@ echo                      = CND.echo.bind CND
 
 #-----------------------------------------------------------------------------------------------------------
 @group = ( me, loners = null ) ->
+  @linearize me
   you     = @new_graph me
   loners  = loners ? me[ 'loners' ]
   R       = []
