@@ -419,6 +419,56 @@ LTSORT                    = require './main'
   done()
   return null
 
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "linearity" ] = ( T, done ) ->
+  #.........................................................................................................
+  graph = LTSORT.new_graph loners: no
+  debug()
+  debug groups    = LTSORT.group          graph
+  debug linearity = LTSORT.get_linearity  graph
+  T.eq groups, []
+  T.eq linearity, 0
+  #.........................................................................................................
+  graph = LTSORT.new_graph loners: no
+  LTSORT.add graph, 'A'
+  LTSORT.add graph, 'B'
+  LTSORT.add graph, 'C'
+  debug()
+  debug groups    = LTSORT.group          graph
+  debug linearity = LTSORT.get_linearity  graph
+  T.eq groups, [ [ 'A', 'B', 'C' ] ]
+  T.eq linearity, 0
+  #.........................................................................................................
+  graph = LTSORT.new_graph loners: no
+  LTSORT.add graph, 'A'
+  LTSORT.add graph, 'B'
+  LTSORT.add graph, 'C'
+  LTSORT.add graph, 'D'
+  LTSORT.add graph, 'E'
+  debug()
+  debug groups    = LTSORT.group          graph
+  debug linearity = LTSORT.get_linearity  graph
+  T.eq groups, [ [ 'A', 'B', 'C', 'D', 'E' ] ]
+  T.eq linearity, 0
+  debug()
+  LTSORT.add graph, 'A', 'E'
+  debug groups    = LTSORT.group          graph
+  debug linearity = LTSORT.get_linearity  graph
+  T.eq groups, [ [ 'A', 'B', 'C', 'D' ], [ 'E' ] ]
+  T.eq linearity, 0.25
+  #.........................................................................................................
+  graph = LTSORT.new_graph loners: no
+  LTSORT.add graph, 'A', 'B'
+  LTSORT.add graph, 'B', 'C'
+  debug()
+  debug groups    = LTSORT.group          graph
+  debug linearity = LTSORT.get_linearity  graph
+  T.eq groups, [ [ 'A' ], [ 'B' ], [ 'C' ] ]
+  T.eq linearity, 1
+  #.........................................................................................................
+  done()
+
 #-----------------------------------------------------------------------------------------------------------
 @demo = ( T ) ->
   elements  = @_probes[ 'small' ]
@@ -460,25 +510,26 @@ LTSORT                    = require './main'
 unless module.parent?
   include = [
     # "demo",
-    "sorting",
-    "existence",
-    "deletion",
-    "root nodes, lone nodes (1)",
-    "root nodes, lone nodes (2)",
-    "copy (1)",
-    "copy (2)",
-    "group (1)",
-    "group (2)",
-    "group (3)",
-    "group (4)",
-    "test for lone node",
-    "demo (1)",
-    "demo (2)",
-    "demo (3)",
-    "demo (4)",
-    "using precedents, actions, and consequents",
-    "cycle detection (1)",
-    "cycle detection (2)",
+    "sorting"
+    "existence"
+    "deletion"
+    "root nodes, lone nodes (1)"
+    "root nodes, lone nodes (2)"
+    "copy (1)"
+    "copy (2)"
+    "group (1)"
+    "group (2)"
+    "group (3)"
+    "group (4)"
+    "test for lone node"
+    "demo (1)"
+    "demo (2)"
+    "demo (3)"
+    "demo (4)"
+    "using precedents, actions, and consequents"
+    "cycle detection (1)"
+    "cycle detection (2)"
+    "linearity"
     ]
 
   @_prune()
