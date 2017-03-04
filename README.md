@@ -1,3 +1,31 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [LTSort](#ltsort)
+  - [Rationale](#rationale)
+  - [Example](#example)
+  - [API](#api)
+    - [Creation](#creation)
+      - [`@new_graph settings`](#new_graph-settings)
+    - [Population](#population)
+      - [`@add graph, lhs, relation = null, rhs = null`](#add-graph-lhs-relation--null-rhs--null)
+      - [`@populate graph, elements`](#populate-graph-elements)
+    - [Deletion](#deletion)
+      - [`@delete graph, name`](#delete-graph-name)
+    - [Retrieval](#retrieval)
+      - [`@has_node graph, name`](#has_node-graph-name)
+      - [`@has_nodes graph`](#has_nodes-graph)
+      - [`@is_lone_node graph, name`](#is_lone_node-graph-name)
+      - [`@find_lone_nodes graph, root_nodes = null`](#find_lone_nodes-graph-root_nodes--null)
+      - [`@find_root_nodes graph, loners = null`](#find_root_nodes-graph-loners--null)
+    - [Sorting](#sorting)
+      - [`@get_linearity graph`](#get_linearity-graph)
+      - [`@linearize graph`](#linearize-graph)
+      - [`@group graph, loners = null`](#group-graph-loners--null)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 
 
 # LTSort
