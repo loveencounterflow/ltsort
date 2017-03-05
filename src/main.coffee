@@ -55,7 +55,8 @@ echo                      = CND.echo.bind CND
 @_link = ( me, precedent, consequent ) ->
   @_register me, precedent
   @_register me, consequent
-  ( me[ 'precedents' ].get consequent ).push precedent
+  target = me[ 'precedents' ].get consequent
+  target.push precedent unless precedent in target
   return me
 
 #-----------------------------------------------------------------------------------------------------------
