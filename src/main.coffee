@@ -174,12 +174,14 @@ echo                      = CND.echo.bind CND
   ### Linearity of a given dependency graph measures how well the dependency relations in a graph
   determine an ordering of its nodes. For a graph that defines a unique, single chain of antecedents and
   consequents, linearity will be 1; for a graph that defines only nodes and no dependency edges, linearity
-  will be zero; for all other kind of graphs, linearity will be close to the inverse of the average group
-  length. ###
+  will be zero; for all other kind of graphs, linearity will be the inverse of the average group length.
+  The linearity of all graphs with a single element is 1. The linearity of the emtpy graph is also 1, since
+  that is the limit that is approached taking ever more nodes out of maximally linear as well as out of
+  minimally linear (parallel-only) graphs. ###
   throw new Error "linearity not implemented for graphs with loners" if graph[ 'loners' ]
   groups  = @group graph
   size    = groups.length
-  return 0 if size is 0
+  return 1 if size is 0
   count   = 0
   count  += group.length for group in groups
   minimum = 1 / count

@@ -427,7 +427,7 @@ LTSORT                    = require './main'
   debug groups    = LTSORT.group          graph
   debug linearity = LTSORT.get_linearity  graph
   T.eq groups, []
-  T.eq linearity, 0
+  T.eq linearity, 1
   #.........................................................................................................
   graph = LTSORT.new_graph loners: no
   LTSORT.add graph, 'A'
