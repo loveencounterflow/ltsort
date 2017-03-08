@@ -420,7 +420,7 @@ LTSORT                    = require './main'
   return null
 
 #-----------------------------------------------------------------------------------------------------------
-@[ "linearity" ] = ( T, done ) ->
+@[ "linearity (1)" ] = ( T, done ) ->
   #.........................................................................................................
   graph = LTSORT.new_graph loners: no
   debug()
@@ -437,7 +437,7 @@ LTSORT                    = require './main'
   debug groups    = LTSORT.group          graph
   debug linearity = LTSORT.get_linearity  graph
   T.eq groups, [ [ 'A', 'B', 'C' ] ]
-  T.eq linearity, 0
+  T.eq linearity, 0.3333333333333333
   #.........................................................................................................
   graph = LTSORT.new_graph loners: no
   LTSORT.add graph, 'A'
@@ -449,13 +449,13 @@ LTSORT                    = require './main'
   debug groups    = LTSORT.group          graph
   debug linearity = LTSORT.get_linearity  graph
   T.eq groups, [ [ 'A', 'B', 'C', 'D', 'E' ] ]
-  T.eq linearity, 0
+  T.eq linearity, 0.2
   debug()
   LTSORT.add graph, 'A', 'E'
   debug groups    = LTSORT.group          graph
   debug linearity = LTSORT.get_linearity  graph
   T.eq groups, [ [ 'A', 'B', 'C', 'D' ], [ 'E' ] ]
-  T.eq linearity, 0.25
+  T.eq linearity, 0.4
   #.........................................................................................................
   graph = LTSORT.new_graph loners: no
   LTSORT.add graph, 'A', 'B'
@@ -465,6 +465,48 @@ LTSORT                    = require './main'
   debug linearity = LTSORT.get_linearity  graph
   T.eq groups, [ [ 'A' ], [ 'B' ], [ 'C' ] ]
   T.eq linearity, 1
+  #.........................................................................................................
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "linearity (2)" ] = ( T, done ) ->
+  graph = LTSORT.new_graph loners: no
+  #.........................................................................................................
+  lin   = LTSORT.get_linearity graph
+  nlin  = LTSORT.get_normal_linearity graph
+  T.eq lin, 1
+  T.eq nlin, 1
+  #.........................................................................................................
+  LTSORT.add graph, 'X'
+  lin   = LTSORT.get_linearity graph
+  nlin  = LTSORT.get_normal_linearity graph
+  T.eq lin, 1
+  T.eq nlin, 1
+  #.........................................................................................................
+  LTSORT.add graph, 'Y'
+  lin   = LTSORT.get_linearity graph
+  nlin  = LTSORT.get_normal_linearity graph
+  T.eq lin, 0.5
+  T.eq nlin, 0
+  #.........................................................................................................
+  LTSORT.add graph, 'Z'
+  lin   = LTSORT.get_linearity graph
+  nlin  = LTSORT.get_normal_linearity graph
+  T.eq lin, 0.3333333333333333
+  T.eq nlin, 0
+  #.........................................................................................................
+  LTSORT.add graph, 'A', 'B'
+  LTSORT.add graph, 'B', 'C'
+  lin   = LTSORT.get_linearity graph
+  nlin  = LTSORT.get_normal_linearity graph
+  T.eq lin, 0.5
+  T.eq nlin, 0.4
+  #.........................................................................................................
+  LTSORT.add graph, 'A', 'a'
+  lin = LTSORT.get_linearity graph
+  nlin  = LTSORT.get_normal_linearity graph
+  T.eq lin, 0.42857142857142855
+  T.eq nlin, 0.3333333333333333
   #.........................................................................................................
   done()
 
@@ -537,7 +579,8 @@ unless module.parent?
     "using precedents, actions, and consequents"
     "cycle detection (1)"
     "cycle detection (2)"
-    "linearity"
+    "linearity (1)"
+    "linearity (2)"
     "avoid reduplication"
     ]
 

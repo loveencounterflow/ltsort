@@ -170,7 +170,7 @@ echo                      = CND.echo.bind CND
   return R
 
 #-----------------------------------------------------------------------------------------------------------
-@get_linearity = ( graph ) ->
+@get_linearity = ( me ) ->
   ### Linearity of a given dependency graph measures how well the dependency relations in a graph
   determine an ordering of its nodes. For a graph that defines a unique, single chain of antecedents and
   consequents, linearity will be 1; for a graph that defines only nodes and no dependency edges, linearity
@@ -178,15 +178,26 @@ echo                      = CND.echo.bind CND
   The linearity of all graphs with a single element is 1. The linearity of the emtpy graph is also 1, since
   that is the limit that is approached taking ever more nodes out of maximally linear as well as out of
   minimally linear (parallel-only) graphs. ###
-  throw new Error "linearity not implemented for graphs with loners" if graph[ 'loners' ]
-  groups  = @group graph
-  size    = groups.length
-  return 1 if size is 0
-  count   = 0
-  count  += group.length for group in groups
-  minimum = 1 / count
-  shrink  = 1 - minimum
-  return ( ( groups.length / count ) - minimum ) / shrink
+  [ group_count, node_count, ] = @_get_group_and_node_count me
+  return group_count / node_count
+
+#-----------------------------------------------------------------------------------------------------------
+@_get_group_and_node_count = ( me ) ->
+  throw new Error "linearity not implemented for graphs with loners" if me[ 'loners' ]
+  groups      = @group me
+  group_count = groups.length
+  return [ 1, 1, ] if group_count is 0
+  node_count  = 0
+  node_count += group.length for group in groups
+  return [ group_count, node_count, ]
+
+#-----------------------------------------------------------------------------------------------------------
+@get_normal_linearity = ( me ) ->
+  [ group_count, node_count, ]  = @_get_group_and_node_count me
+  return 1 if group_count == node_count == 1
+  minimum                       = 1 / node_count
+  shrink                        = 1 - minimum
+  return ( ( group_count / node_count ) - minimum ) / shrink
 
 
 
