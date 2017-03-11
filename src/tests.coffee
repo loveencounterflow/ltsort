@@ -520,6 +520,125 @@ LTSORT                    = require './main'
   done()
 
 #-----------------------------------------------------------------------------------------------------------
+@[ "Ruby inheritance linearization (1)" ] = ( T, done ) ->
+  ### patterned after *Ruby's Dark Corners* http://norswap.com/ruby-module-linearization/ ###
+  ###
+  module A3; end
+  module C3
+    include A3
+  end
+  module D3
+    include A3
+  end
+  module E3
+    include C3
+    include D3
+  end
+  # E3.ancestors    => [E3, D3, C3, A3]
+  ###
+  graph = LTSORT.new_graph loners: no
+  group     = ( graph ) -> ( LTSORT.group     graph ).reverse()
+  linearize = ( graph ) -> ( LTSORT.linearize graph ).reverse()
+  LTSORT.add graph, 'A3'
+  LTSORT.add graph, 'A3', 'C3'
+  LTSORT.add graph, 'A3', 'D3'
+  LTSORT.add graph, 'C3', 'E3'
+  LTSORT.add graph, 'C3', 'D3' # b/c in E3, C3 is mentioned earlier than D3
+  LTSORT.add graph, 'D3', 'E3'
+  debug group     graph
+  debug linearize graph
+  T.eq ( group      graph ), [ [ 'E3' ], [ 'D3' ], [ 'C3' ], [ 'A3' ] ]
+  T.eq ( linearize  graph ), [ 'E3', 'D3', 'C3', 'A3' ]
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "Ruby inheritance linearization (2)" ] = ( T, done ) ->
+  ### patterned after *Ruby's Dark Corners* http://norswap.com/ruby-module-linearization/ ###
+  ###
+  module A4; end
+  module B4; end
+  module F4; end
+  module C4
+    include B4
+    include A4
+  end
+  module D4
+    include F4
+    include A4
+  end
+  module E4
+    include C4
+    include D4
+  end
+  # E4.ancestors    => [E4, D4, C4, A4, F4, B4]
+  ###
+  graph = LTSORT.new_graph loners: no
+  group     = ( graph ) -> ( LTSORT.group     graph ).reverse()
+  linearize = ( graph ) -> ( LTSORT.linearize graph ).reverse()
+  LTSORT.add graph, 'A4'
+  LTSORT.add graph, 'B4'
+  LTSORT.add graph, 'F4'
+  LTSORT.add graph, 'B4', 'C4'
+  LTSORT.add graph, 'A4', 'C4'
+  LTSORT.add graph, 'B4', 'A4' # b/c in C4, B4 is mentioned earlier than A4
+
+  LTSORT.add graph, 'F4', 'D4'
+  LTSORT.add graph, 'A4', 'D4'
+  LTSORT.add graph, 'F4', 'A4'
+
+  LTSORT.add graph, 'C4', 'E4'
+  LTSORT.add graph, 'D4', 'E4'
+  LTSORT.add graph, 'C4', 'D4'
+  debug LTSORT.get_linearity graph
+  debug group     graph
+  debug linearize graph
+  # T.eq ( group      graph ), [ [ 'E4' ], [ 'D4' ], [ 'C4' ], [ 'A4' ] ]
+  T.eq ( linearize  graph ), [ 'E4', 'D4', 'C4', 'A4', 'F4', 'B4', ]
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
+@[ "Ruby inheritance linearization (3)" ] = ( T, done ) ->
+  ### patterned after *Ruby's Dark Corners* http://norswap.com/ruby-module-linearization/ ###
+  ###
+  module A5; end
+  module B5; end
+  module C5
+    include B5
+    include A5
+  end
+  module D5
+    include A5
+    include B5
+  end
+  module E5
+    include C5
+    include D5
+  end
+
+  # E5.ancestors    => [E5, D5, C5, A5, B5]
+  ###
+  graph = LTSORT.new_graph loners: no
+  group     = ( graph ) -> ( LTSORT.group     graph ).reverse()
+  linearize = ( graph ) -> ( LTSORT.linearize graph ).reverse()
+  LTSORT.add graph, 'A5'
+  LTSORT.add graph, 'B5'
+  LTSORT.add graph, 'B5', 'C5'
+  LTSORT.add graph, 'A5', 'C5'
+  LTSORT.add graph, 'B5', 'A5'
+  LTSORT.add graph, 'A5', 'D5'
+  LTSORT.add graph, 'B5', 'D5'
+  # LTSORT.add graph, 'A5', 'B5'
+  LTSORT.add graph, 'C5', 'E5'
+  LTSORT.add graph, 'D5', 'E5'
+  LTSORT.add graph, 'C5', 'D5'
+  debug LTSORT.get_linearity graph
+  debug group     graph
+  debug linearize graph
+  # T.eq ( group      graph ), [ [ 'E5' ], [ 'D5' ], [ 'C5' ], [ 'A5' ] ]
+  # T.eq ( linearize  graph ), [ 'E5', 'D5', 'C5', 'A5', 'F5', 'B5', ]
+  done()
+
+#-----------------------------------------------------------------------------------------------------------
 @demo = ( T ) ->
   elements  = @_probes[ 'small' ]
   graph     = LTSORT.populate ( LTSORT.new_graph loners: no ), elements
@@ -582,6 +701,9 @@ unless module.parent?
     "linearity (1)"
     "linearity (2)"
     "avoid reduplication"
+    "Ruby inheritance linearization (1)"
+    "Ruby inheritance linearization (2)"
+    "Ruby inheritance linearization (3)"
     ]
 
   @_prune()
