@@ -4,7 +4,7 @@
   "description": "Topological Sort with Support for Levels",
   "main": "lib/main.js",
   "scripts": {
-    "build": "gulp build",
+    "build": "coffee --map -o lib -c src",
     "test": "npm run build && node lib/tests.js"
   },
   "repository": {
@@ -24,12 +24,9 @@
   },
   "homepage": "https://github.com/loveencounterflow/ltsort",
   "dependencies": {
-    "cnd": "^4.2.0"
+    "cnd": "^4.6.0"
   },
   "devDependencies": {
-    "gulp": "^3.9.1",
-    "gulp-coffee": "^2.3.1",
-    "gulp-sourcemaps": "^1.6.0",
-    "guy-test": "^1.1.2"
+    "guy-test": "^1.4.0"
   }
 }
