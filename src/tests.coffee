@@ -59,7 +59,7 @@ LTSORT                    = require './main'
   probe     = LTSORT.linearize graph
   #.........................................................................................................
   for element in elements
-    continue if CND.isa_text element
+    continue if LTSORT.types.isa.text element
     [ a, b, ] = element
     T.ok ( a_idx = probe.indexOf a ) >= 0
     T.ok ( b_idx = probe.indexOf b ) >= 0
@@ -73,7 +73,7 @@ LTSORT                    = require './main'
   graph     = LTSORT.populate LTSORT.new_graph(), elements
   #.........................................................................................................
   for element in elements
-    if CND.isa_text element
+    if LTSORT.types.isa.text element
       T.ok LTSORT.has_node graph, element
     else
       [ a, b, ] = element
@@ -111,7 +111,7 @@ LTSORT                    = require './main'
   graph     = LTSORT.populate LTSORT.new_graph(), elements
   #.........................................................................................................
   for element in elements
-    if CND.isa_text element
+    if LTSORT.types.isa.text element
       LTSORT.add graph, element
     else
       [ a, b, ] = element

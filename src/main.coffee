@@ -1,4 +1,7 @@
 
+'use strict'
+
+### Adapted from https://github.com/eknkc/tsort ###
 
 ############################################################################################################
 njs_util                  = require 'util'
@@ -17,14 +20,13 @@ warn                      = CND.get_logger 'warn',      badge
 help                      = CND.get_logger 'help',      badge
 urge                      = CND.get_logger 'urge',      badge
 echo                      = CND.echo.bind CND
-
-
-### Adapted from https://github.com/eknkc/tsort ###
+@types                    = new ( require 'intertype' ).Intertype()
+{ isa }                   = @types.export()
 
 
 #-----------------------------------------------------------------------------------------------------------
 @new_graph = ( settings ) ->
-  return @_copy settings if CND.isa settings, 'LTSORT/graph'
+  return @_copy settings if ( isa.object settings ) and ( settings[ '~isa' ] is 'LTSORT/graph' )
   settings ?= {}
   R =
     '~isa':       'LTSORT/graph'
@@ -43,7 +45,7 @@ echo                      = CND.echo.bind CND
 @populate = ( me, elements ) ->
   #.........................................................................................................
   for element in elements
-    if CND.isa_text element
+    if isa.text element
       @add me, element
     else
       [ a, b, ] = element
