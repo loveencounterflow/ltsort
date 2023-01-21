@@ -1,42 +1,26 @@
+lockfileVersion: 5.4
+
+specifiers:
+  cnd: 9.2.1
+  intertype: 7.6.5
+
 dependencies:
   cnd: 9.2.1
   intertype: 7.6.5
-devDependencies:
-  guy-test: 4.0.1
-lockfileVersion: 5.2
+
 packages:
-  /async/3.2.0:
-    dev: true
-    resolution:
-      integrity: sha512-TR2mEZFVOj2pLStYxLht7TyfuRzaydfpxr3k9RpHIzMgw7A64dzsdqCxH1WJyQdoe8T10nDXd9wnEigmiuHIZw==
+
   /cnd/9.2.1:
+    resolution: {integrity: sha512-JszZtSlOCxkIvNPKpw1PmIcQUjYO+pBqVoKVH2STHLtG4JHHJ1NHowv39lhyxzlPxUTZk7pZ3qO7CfrfJ8ZSKw==}
     hasBin: true
-    resolution:
-      integrity: sha512-JszZtSlOCxkIvNPKpw1PmIcQUjYO+pBqVoKVH2STHLtG4JHHJ1NHowv39lhyxzlPxUTZk7pZ3qO7CfrfJ8ZSKw==
-  /guy-test/4.0.1:
-    dependencies:
-      async: 3.2.0
-      cnd: 9.2.1
-      intertype: 7.6.3
-    dev: true
-    resolution:
-      integrity: sha512-NH2ZCLVFCEGmTe2znmCuflSL8Uo1jTAXTSpYOkijstXFwonLtaScfmkVw5e2dL9GAcQ0GlPZRhdhySbhUCgVSg==
-  /intertype/7.6.3:
-    dependencies:
-      multimix: 5.0.0
-    dev: true
-    resolution:
-      integrity: sha512-77FmgaqGydWBc5OIde+geMj4+dGZ1i5UIFXM4C9QHiEIBjh+Gojycsb7XtRYYLNhNJepa+jotHXfAGPngHatzw==
+    dev: false
+
   /intertype/7.6.5:
+    resolution: {integrity: sha512-763YK3ezLYy9FkX+cTTg/qwGHteqlaTMiec9a2sVAKm7kXp9e7QkzbyYS6u4CcbLxx12L8bcRbe3SFsPeaJCMA==}
     dependencies:
       multimix: 5.0.0
     dev: false
-    resolution:
-      integrity: sha512-763YK3ezLYy9FkX+cTTg/qwGHteqlaTMiec9a2sVAKm7kXp9e7QkzbyYS6u4CcbLxx12L8bcRbe3SFsPeaJCMA==
+
   /multimix/5.0.0:
-    resolution:
-      integrity: sha512-N9cdGSDDD7kxOV7R6e4iZqsHTZ4F4iiSDWqMcVqx4gEH6HBtRXav39Gj3fgT1YqvBcwPCQuf0Oa5R2cDaLWK8A==
-specifiers:
-  cnd: 9.2.1
-  guy-test: 4.0.1
-  intertype: 7.6.5
+    resolution: {integrity: sha512-N9cdGSDDD7kxOV7R6e4iZqsHTZ4F4iiSDWqMcVqx4gEH6HBtRXav39Gj3fgT1YqvBcwPCQuf0Oa5R2cDaLWK8A==}
+    dev: false
