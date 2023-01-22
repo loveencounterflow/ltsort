@@ -23,6 +23,7 @@
       - [`@get_linearity graph`](#get_linearity-graph)
       - [`@linearize graph`](#linearize-graph)
       - [`@group graph, loners = null`](#group-graph-loners--null)
+- [To Do](#to-do)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -279,7 +280,79 @@ the constraints given, and not necessarily the only one.
 
 
 
+# To Do
 
+* **[–]** modernize
+* **[–]** rewrite as class
+* **[–]** should we support anything but strings as keys?
+* **[–]** use more explicit `cfg` (named keys) API
+* **[–]** support symbolic `*` star to mean 'before, after any other', as implemented in
+  `hengist/dev/intertext-lexer/src/test-toposort.coffee` (2023-01-22):
+
+  ```coffee
+  @toposort = ( T, done ) ->
+    # T?.halt_on_error()
+    LTSORT                    = require '../../../apps/ltsort'
+    topograph                 = LTSORT.new_graph { loners: true, }
+    lexemes                   = []
+    antecedents               = []
+    subsequents               = []
+    #.........................................................................................................
+    add_lexeme = ( cfg ) ->
+      cfg         = { { name, after, before, }..., cfg..., }
+      { name
+        after
+        before  } = cfg
+      validate.nonempty.text name
+      after      ?= []
+      before     ?= []
+      after       = [ after,  ] unless isa.list after
+      before      = [ before, ] unless isa.list before
+      if ( before.length is 0 ) and ( after.length is 0 )
+        LTSORT.add topograph, name
+      else
+        for d in after
+          if d is '*'
+            subsequents.push name unless name in subsequents
+            continue
+          LTSORT.add topograph, d, name
+        for d in before
+          if d is '*'
+            antecedents.unshift name unless name in antecedents
+            continue
+          LTSORT.add topograph, name, d
+      return null
+    #.........................................................................................................
+    finalize = ->
+      names = [ topograph.precedents.keys()..., ]
+      for antecedent, idx in antecedents
+        help '^08-5^', antecedent, antecedents[ ... idx ]
+        for name in [ names..., antecedents[ ... idx ]..., subsequents..., ]
+          continue if antecedent is name
+          LTSORT.add topograph, antecedent, name
+      for subsequent, idx in subsequents
+        warn '^08-6^', subsequent, subsequents[ ... idx ]
+        for name in [ names..., subsequents[ ... idx ]..., antecedents..., ]
+          continue if subsequent is name
+          LTSORT.add topograph, name, subsequent
+      return null
+    #.........................................................................................................
+    add_lexeme { name: 'getup',       before: '*', }
+    add_lexeme { name: 'brushteeth',  before: '*', }
+    add_lexeme { name: 'shop',        before: '*', }
+    add_lexeme { name: 'cook',        before: 'eat', }
+    add_lexeme { name: 'serve', after: 'cook', before: 'eat', }
+    add_lexeme { name: 'dishes',      after: '*', }
+    add_lexeme { name: 'sleep',       after: '*', }
+    add_lexeme { name: 'eat',         after: 'cook', }
+    #.........................................................................................................
+    debug '^08-1^', { antecedents, subsequents, }
+    finalize()
+    show topograph
+    #.........................................................................................................
+    done?()
+    return null
+  ```
 
 
 
