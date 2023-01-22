@@ -108,6 +108,12 @@
     * **Note** one *can* call `g.linearize()` *before* adding the bully, and then linearize again. The bully
       is now in the first place. This surprising behavior is considered a bug and will be removed in a
       future version.
+* admittedly, while the use of the attribute names `before` and `after` is colloquial and unsurprising,
+  there's still room for misunderstanding; after all, when 'a comes *before* b' is true, then 'b comes
+  *after* a', so which one is it in `{ name: 'a', before 'b', }`? Does it mean 'here is an a, it comes
+  before b' or 'here is an a, before it there is b'? It's the former, so always think 'I come before x', 'I
+  come after y'. Another way to remember this is the (I find) rather intuitive meaning of `{ name: 'a',
+  before '*', }`, which means 'a comes before anything else'.
 
 ## To Do
 
