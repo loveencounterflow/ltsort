@@ -77,6 +77,7 @@ class Ltsort
     GUY.props.hide @, 'types', get_base_types()
     @cfg        = @types.create.lt_constructor_cfg cfg
     GUY.props.hide @, 'topograph', LTSORT.new_graph @cfg
+    GUY.props.hide @, 'precedents',  {}
     GUY.props.hide @, 'antecedents', []
     GUY.props.hide @, 'subsequents', []
     return undefined
@@ -84,38 +85,75 @@ class Ltsort
   #---------------------------------------------------------------------------------------------------------
   add: ( cfg ) ->
     cfg = @types.create.lt_add_cfg cfg
+    #.......................................................................................................
     if ( cfg.before.length is 0 ) and ( cfg.after.length is 0 )
-      LTSORT.add @topograph, cfg.name
-      return null
+      return @_register cfg.name
+    #.......................................................................................................
     for relative in cfg.after
       if relative is '*'
         @subsequents.push cfg.name unless cfg.name in @subsequents
         continue
-      LTSORT.add @topograph, relative, cfg.name
+      @_add 'after', cfg.name, relative
+    #.......................................................................................................
     for relative in cfg.before
       if relative is '*'
-        @antecedents.unshift cfg.name unless cfg.name in @antecedents
+        @antecedents.push cfg.name unless cfg.name in @antecedents
         continue
-      LTSORT.add @topograph, cfg.name, relative
+      @_add 'before', relative, cfg.name
+    #.......................................................................................................
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  _register: ( name ) ->
+    @precedents[ name ] ?= []
+    return null
+
+  #---------------------------------------------------------------------------------------------------------
+  _add: ( position, name, precedent ) ->
+    debug '^324^', { position, name, precedent, }
+    if position is 'before'
+      if      ( idx = @antecedents.indexOf name      ) > -1 then return @antecedents.splice idx + 1, 0, precedent
+      else if ( idx = @antecedents.indexOf precedent ) > -1 then return @antecedents.splice idx + 0, 0, name
+      else if ( idx = @subsequents.indexOf precedent ) > -1 then return @subsequents.splice idx + 1, 0, name
+      else if ( idx = @subsequents.indexOf name      ) > -1 then return @subsequents.splice idx + 0, 0, precedent
+    else
+      if      ( idx = @antecedents.indexOf name      ) > -1 then return @antecedents.splice idx + 1, 0, precedent
+      else if ( idx = @antecedents.indexOf precedent ) > -1 then return @antecedents.splice idx + 0, 0, name
+      else if ( idx = @subsequents.indexOf precedent ) > -1 then return @subsequents.splice idx + 1, 0, name
+      else if ( idx = @subsequents.indexOf name      ) > -1 then return @subsequents.splice idx + 0, 0, precedent
+    @_register name
+    @_register precedent
+    @precedents[ name ].push precedent
     return null
 
   #---------------------------------------------------------------------------------------------------------
   _finalize: ->
+    LTSORT.clear @topograph
+    #.......................................................................................................
+    for name, precedents of @precedents
+      LTSORT.add @topograph, name
+      LTSORT.add @topograph, name, precedent for precedent in precedents
+    #.......................................................................................................
     return null if ( @antecedents.length is 0 ) and ( @subsequents.length is 0 )
     names = [ @topograph.precedents.keys()..., ]
     #.......................................................................................................
+    ### after: '*' ###
+    for subsequent, idx in @subsequents
+      for name in [ names..., @subsequents[ ... idx ]..., @antecedents..., ]
+        continue if subsequent is name
+        # debug '^234^', [ subsequent, @topograph.precedents.get subsequent ], [ name, @topograph.precedents.get name ]
+        # debug '^234^', GUY.trm.truth subsequent in ( ( @topograph.precedents.get name       ) ? [] )
+        # debug '^234^', GUY.trm.truth name       in ( ( @topograph.precedents.get subsequent ) ? [] )
+        # continue if subsequent in ( ( @topograph.precedents.get name       ) ? [] )
+        # continue if name       in ( ( @topograph.precedents.get subsequent ) ? [] )
+        LTSORT.add @topograph, name, subsequent
+    #.......................................................................................................
+    ### before: '*' ###
     for antecedent, idx in @antecedents
       for name in [ names..., @antecedents[ ... idx ]..., @subsequents..., ]
         continue if antecedent is name
         LTSORT.add @topograph, antecedent, name
     #.......................................................................................................
-    for subsequent, idx in @subsequents
-      for name in [ names..., @subsequents[ ... idx ]..., @antecedents..., ]
-        continue if subsequent is name
-        LTSORT.add @topograph, name, subsequent
-    #.......................................................................................................
-    @antecedents.length = 0
-    @subsequents.length = 0
     return null
 
   #---------------------------------------------------------------------------------------------------------
