@@ -95,18 +95,17 @@
     to any other node); if these nodes denote tasks, they may be executed at any time between starting and
     completing the complex activity described by the graph. All other groups must have finished all their
     subtasks before proceding to the next group
+* the linearization of an empty graph is an empty list `[]`. The grouped linearization of an empty graph is
+  a list with a single empty list `[[]]`. the empty list signifies 'no loners'.
 * use a star to denote when a node should come `before` or `after` all others
+  * using a star applies the ordering relation—`before` or `after`—to all known nodes except the current
+    one. Nodes that are added later may still come before one that was added earlier as `{ before: '*', }`
+    or after one added earlier as `{ after: '*', }`
   * should there be more than one node with `{ before: '*', }`, later nodes will override earlier ones;
     therefore, adding `{ name: 't1', before: '*', }`, `{ name: 't2', before: '*', }`, `{ name: 't3', before:
     '*', }` to an empty graph will cause the first three places be occupied by `t3` on top, followed by
     `t2`, and `t1`, in that order
   * the same is true for `{ after: '*', }`
-  * once a node has been added with, e.g., `{ name: 't1', before: '*', }`, any attempt to usurp the first
-    place by adding, say, `{ name: 'bully', before: 't1', }` will fail (upon calling `g.linearize()`) with
-    the message `detected cycle`
-    * **Note** one *can* call `g.linearize()` *before* adding the bully, and then linearize again. The bully
-      is now in the first place. This surprising behavior is considered a bug and will be removed in a
-      future version.
 * admittedly, while the use of the attribute names `before` and `after` is colloquial and unsurprising,
   there's still room for misunderstanding; after all, when 'a comes *before* b' is true, then 'b comes
   *after* a', so which one is it in `{ name: 'a', before 'b', }`? Does it mean 'here is an a, it comes
