@@ -96,12 +96,11 @@
     completing the complex activity described by the graph. All other groups must have finished all their
     subtasks before proceding to the next group
 * use a star to denote when a node should come `before` or `after` all others
-  * should there be more than one node with `{ before: '*', }`, those nodes will preserve their relative
-    ordering; therefore, adding `{ name: 't1', before: '*', }`, `{ name: 't2', before: '*', }`, `{ name:
-    't3', before: '*', }` to an empty graph will cause the first three places be occupied by `t1`, `t2`, and
-    `t3`, in that order
-  * the same is true for `{ after: '*', }`, with the understanding that the *last* node to have that setting
-    will always occupy the last position in the linearization
+  * should there be more than one node with `{ before: '*', }`, later nodes will override earlier ones;
+    therefore, adding `{ name: 't1', before: '*', }`, `{ name: 't2', before: '*', }`, `{ name: 't3', before:
+    '*', }` to an empty graph will cause the first three places be occupied by `t3` on top, followed by
+    `t2`, and `t1`, in that order
+  * the same is true for `{ after: '*', }`
   * once a node has been added with, e.g., `{ name: 't1', before: '*', }`, any attempt to usurp the first
     place by adding, say, `{ name: 'bully', before: 't1', }` will fail (upon calling `g.linearize()`) with
     the message `detected cycle`
@@ -120,6 +119,8 @@
 * **[–]** modernize
 * **[–]** rewrite as class
 * **[–]** should we support anything but strings as keys?
+* **[–]** do allow to override `before: '*'` w/out having to resort to tricks. Might want to resort to the
+  principle that later statements should override earlier ones.
 
 ## Is Done
 
