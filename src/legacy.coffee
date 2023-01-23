@@ -73,6 +73,11 @@ echo                      = CND.echo.bind CND
   return R
 
 #-----------------------------------------------------------------------------------------------------------
+@clear = ( me ) ->
+  me.precedents.clear()
+  return null
+
+#-----------------------------------------------------------------------------------------------------------
 @delete = ( me, name ) ->
   precedents = @_get_precedents me, name
   throw new Error "unable to remove non-root node #{rpr name}" unless precedents.length is 0
