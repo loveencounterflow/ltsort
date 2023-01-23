@@ -31,14 +31,14 @@ echo                      = CND.echo.bind CND
   R =
     '~isa':       'LTSORT/graph'
     'precedents': new Map()
-    'loners':     settings[ 'loners' ] ? yes
+    'loners':     settings.loners ? yes
   return R
 
 #-----------------------------------------------------------------------------------------------------------
 @_copy = ( me ) ->
-  R = @new_graph { loners: me[ 'loners' ], }
-  for [ name, precedents, ] in Array.from me[ 'precedents' ].entries()
-    R[ 'precedents' ].set name, ( precedent for precedent in precedents )
+  R = @new_graph { loners: me.loners, }
+  for [ name, precedents, ] in Array.from me.precedents.entries()
+    R.precedents.set name, ( precedent for precedent in precedents )
   return R
 
 #-----------------------------------------------------------------------------------------------------------
@@ -57,18 +57,18 @@ echo                      = CND.echo.bind CND
 @_link = ( me, precedent, consequent ) ->
   @_register me, precedent
   @_register me, consequent
-  target = me[ 'precedents' ].get consequent
+  target = me.precedents.get consequent
   target.push precedent unless precedent in target
   return me
 
 #-----------------------------------------------------------------------------------------------------------
 @_register = ( me, name ) ->
-  me[ 'precedents' ].set name, [] unless me[ 'precedents' ].has name
+  me.precedents.set name, [] unless me.precedents.has name
   return me
 
 #-----------------------------------------------------------------------------------------------------------
 @_get_precedents = ( me, name ) ->
-  unless ( R = me[ 'precedents' ].get name )?
+  unless ( R = me.precedents.get name )?
     throw new Error "unknown node #{rpr name}"
   return R
 
@@ -76,8 +76,8 @@ echo                      = CND.echo.bind CND
 @delete = ( me, name ) ->
   precedents = @_get_precedents me, name
   throw new Error "unable to remove non-root node #{rpr name}" unless precedents.length is 0
-  me[ 'precedents' ].delete name
-  for precedents in Array.from me[ 'precedents' ].values()
+  me.precedents.delete name
+  for precedents in Array.from me.precedents.values()
     for idx in [ precedents.length - 1 .. 0 ] by -1
       continue unless precedents[ idx ] is name
       precedents.splice idx, 1
@@ -89,17 +89,17 @@ echo                      = CND.echo.bind CND
 
 #-----------------------------------------------------------------------------------------------------------
 @_is_precedent = ( me, name ) ->
-  for precedents in Array.from me[ 'precedents' ].values()
+  for precedents in Array.from me.precedents.values()
     return true if ( precedents.indexOf name ) >= 0
   return false
 
 #-----------------------------------------------------------------------------------------------------------
 @find_root_nodes = ( me, loners = null ) ->
-  if loners ? me[ 'loners' ]
+  if loners ? me.loners
     test = ( name ) => not @_has_precedents me, name
   else
     test = ( name ) => ( not @_has_precedents me, name ) and ( @_is_precedent me, name )
-  return ( name for name in ( Array.from me[ 'precedents' ].keys() ) when test name )
+  return ( name for name in ( Array.from me.precedents.keys() ) when test name )
 
 #-----------------------------------------------------------------------------------------------------------
 @find_lone_nodes = ( me, root_nodes = null ) ->
@@ -114,11 +114,11 @@ echo                      = CND.echo.bind CND
 
 #-----------------------------------------------------------------------------------------------------------
 @has_node = ( me, name ) ->
-  return me[ 'precedents' ].has name
+  return me.precedents.has name
 
 #-----------------------------------------------------------------------------------------------------------
 @has_nodes = ( me ) ->
-  return me[ 'precedents' ].size > 0
+  return me.precedents.size > 0
 
 #-----------------------------------------------------------------------------------------------------------
 @add = ( me, precedent, consequent = null ) ->
@@ -145,7 +145,7 @@ echo                      = CND.echo.bind CND
 #-----------------------------------------------------------------------------------------------------------
 @linearize = ( me ) ->
   ### As given in http://en.wikipedia.org/wiki/Topological_sorting ###
-  consequents     = Array.from me[ 'precedents' ].keys()
+  consequents     = Array.from me.precedents.keys()
   R               = []
   marks           = {}
   #.........................................................................................................
@@ -158,7 +158,7 @@ echo                      = CND.echo.bind CND
 @group = ( me, loners = null ) ->
   @linearize me
   you     = @new_graph me
-  loners  = loners ? me[ 'loners' ]
+  loners  = loners ? me.loners
   R       = []
   #.........................................................................................................
   if loners
@@ -188,7 +188,7 @@ echo                      = CND.echo.bind CND
 
 #-----------------------------------------------------------------------------------------------------------
 @_get_group_and_node_count = ( me ) ->
-  throw new Error "linearity not implemented for graphs with loners" if me[ 'loners' ]
+  throw new Error "linearity not implemented for graphs with loners" if me.loners
   groups      = @group me
   group_count = groups.length
   return [ 1, 1, ] if group_count is 0
