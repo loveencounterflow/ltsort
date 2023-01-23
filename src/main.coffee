@@ -78,9 +78,13 @@ class Ltsort
     @cfg        = @types.create.lt_constructor_cfg cfg
     GUY.props.hide @, 'topograph', LTSORT.new_graph @cfg
     GUY.props.hide @, 'precedents',  {}
-    GUY.props.hide @, 'antecedents', []
-    GUY.props.hide @, 'subsequents', []
     return undefined
+
+  #---------------------------------------------------------------------------------------------------------
+  _get_relatives: ( name, relatives ) ->
+    if '*' in relatives
+      return ( relative for relative of @precedents when relative isnt name )
+    return relatives
 
   #---------------------------------------------------------------------------------------------------------
   add: ( cfg ) ->
@@ -89,17 +93,17 @@ class Ltsort
     if ( cfg.before.length is 0 ) and ( cfg.after.length is 0 )
       return @_register cfg.name
     #.......................................................................................................
-    for relative in cfg.after
-      if relative is '*'
-        @subsequents.push cfg.name unless cfg.name in @subsequents
-        continue
-      @_add 'after', cfg.name, relative
+    relatives = @_get_relatives cfg.name, cfg.after
+    if relatives.length is 0
+      @_register cfg.name
+    else
+      @_add relative, cfg.name for relative in relatives
     #.......................................................................................................
-    for relative in cfg.before
-      if relative is '*'
-        @antecedents.push cfg.name unless cfg.name in @antecedents
-        continue
-      @_add 'before', relative, cfg.name
+    relatives = @_get_relatives cfg.name, cfg.before
+    if relatives.length is 0
+      @_register cfg.name
+    else
+      @_add cfg.name, relative for relative in relatives
     #.......................................................................................................
     return null
 
@@ -109,17 +113,7 @@ class Ltsort
     return null
 
   #---------------------------------------------------------------------------------------------------------
-  _add: ( position, name, precedent ) ->
-    if position is 'before'
-      if      ( idx = @antecedents.indexOf name      ) > -1 then return @antecedents.splice idx + 1, 0, precedent
-      else if ( idx = @antecedents.indexOf precedent ) > -1 then return @antecedents.splice idx + 0, 0, name
-      else if ( idx = @subsequents.indexOf precedent ) > -1 then return @subsequents.splice idx + 1, 0, name
-      else if ( idx = @subsequents.indexOf name      ) > -1 then return @subsequents.splice idx + 0, 0, precedent
-    else
-      if      ( idx = @antecedents.indexOf name      ) > -1 then return @antecedents.splice idx + 1, 0, precedent
-      else if ( idx = @antecedents.indexOf precedent ) > -1 then return @antecedents.splice idx + 0, 0, name
-      else if ( idx = @subsequents.indexOf precedent ) > -1 then return @subsequents.splice idx + 1, 0, name
-      else if ( idx = @subsequents.indexOf name      ) > -1 then return @subsequents.splice idx + 0, 0, precedent
+  _add: ( name, precedent ) ->
     @_register name
     @_register precedent
     @precedents[ name ].push precedent
@@ -132,21 +126,6 @@ class Ltsort
     for name, precedents of @precedents
       LTSORT.add @topograph, name
       LTSORT.add @topograph, name, precedent for precedent in precedents
-    #.......................................................................................................
-    return null if ( @antecedents.length is 0 ) and ( @subsequents.length is 0 )
-    names = [ @topograph.precedents.keys()..., ]
-    #.......................................................................................................
-    ### after: '*' ###
-    for subsequent, idx in @subsequents
-      for name in [ names..., @subsequents[ ... idx ]..., @antecedents..., ]
-        continue if subsequent is name
-        LTSORT.add @topograph, name, subsequent
-    #.......................................................................................................
-    ### before: '*' ###
-    for antecedent, idx in @antecedents
-      for name in [ names..., @antecedents[ ... idx ]..., @subsequents..., ]
-        continue if antecedent is name
-        LTSORT.add @topograph, antecedent, name
     #.......................................................................................................
     return null
 
