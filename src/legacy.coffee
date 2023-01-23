@@ -127,7 +127,10 @@ echo                      = CND.echo.bind CND
 
 #-----------------------------------------------------------------------------------------------------------
 @_visit = ( me, results, marks, name ) ->
-  throw new Error "detected cycle involving node #{rpr name}" if marks[ name ] is 'visiting'
+  if marks[ name ] is 'visiting'
+    names   = ( ( rpr name ) for name, value of marks when value is 'visiting' ).reverse().join ' ▶ '
+    names  += " ▶ #{rpr name}"
+    throw new Error "detected cycle with nodes #{names}"
   return null if marks[ name ]?
   #.......................................................................................................
   marks[ name ] = 'visiting'
