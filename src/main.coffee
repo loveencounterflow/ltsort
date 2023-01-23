@@ -110,7 +110,6 @@ class Ltsort
 
   #---------------------------------------------------------------------------------------------------------
   _add: ( position, name, precedent ) ->
-    debug '^324^', { position, name, precedent, }
     if position is 'before'
       if      ( idx = @antecedents.indexOf name      ) > -1 then return @antecedents.splice idx + 1, 0, precedent
       else if ( idx = @antecedents.indexOf precedent ) > -1 then return @antecedents.splice idx + 0, 0, name
@@ -141,11 +140,6 @@ class Ltsort
     for subsequent, idx in @subsequents
       for name in [ names..., @subsequents[ ... idx ]..., @antecedents..., ]
         continue if subsequent is name
-        # debug '^234^', [ subsequent, @topograph.precedents.get subsequent ], [ name, @topograph.precedents.get name ]
-        # debug '^234^', GUY.trm.truth subsequent in ( ( @topograph.precedents.get name       ) ? [] )
-        # debug '^234^', GUY.trm.truth name       in ( ( @topograph.precedents.get subsequent ) ? [] )
-        # continue if subsequent in ( ( @topograph.precedents.get name       ) ? [] )
-        # continue if name       in ( ( @topograph.precedents.get subsequent ) ? [] )
         LTSORT.add @topograph, name, subsequent
     #.......................................................................................................
     ### before: '*' ###
