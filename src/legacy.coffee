@@ -63,7 +63,7 @@ echo                      = CND.echo.bind CND
 
 #-----------------------------------------------------------------------------------------------------------
 @_register = ( me, name ) ->
-  me[ 'precedents' ].set name, [] unless ( target = me[ 'precedents' ].get name )?
+  me[ 'precedents' ].set name, [] unless me[ 'precedents' ].has name
   return me
 
 #-----------------------------------------------------------------------------------------------------------
