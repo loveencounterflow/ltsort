@@ -160,17 +160,18 @@ echo                      = CND.echo.bind CND
   return R
 
 #-----------------------------------------------------------------------------------------------------------
-@group = ( me, loners = null ) ->
+@group = ( me ) ->
   @linearize me
   you     = @new_graph me
-  loners  = loners ? me.loners
   R       = []
   #.........................................................................................................
-  if loners
+  if me.loners
     if @has_nodes you
       lone_nodes = @find_lone_nodes you
       R.push lone_nodes
       @delete you, lone_node for lone_node in lone_nodes
+    else
+      R.push []
   #.........................................................................................................
   while @has_nodes you
     root_nodes = @find_root_nodes you, yes
