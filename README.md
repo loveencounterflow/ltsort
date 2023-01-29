@@ -25,17 +25,17 @@
   { Ltsort }  = require '../../../apps/ltsort'
   g           = new Ltsort()
   #.........................................................................................................
-  g.add { name: 'getup',                                    }
-  g.add { name: 'brushteeth',                               }
-  g.add { name: 'shop',                                     }
-  g.add { name: 'cook',                   before: 'eat',    }
-  g.add { name: 'serve',  after: 'cook',  before: 'eat',    }
-  g.add { name: 'dishes', after: 'eat',   before: 'sleep',  }
-  g.add { name: 'loner1',                                   }
-  g.add { name: 'loner2',                                   }
-  g.add { name: 'loner3',                                   }
-  g.add { name: 'sleep',                                    }
-  g.add { name: 'eat',    after: [ 'cook', 'shop', ],       }
+  g.add { name: 'getup',                                      }
+  g.add { name: 'brushteeth',                                 }
+  g.add { name: 'shop',                                       }
+  g.add { name: 'cook',                   precedes: 'eat',    }
+  g.add { name: 'serve',  needs: 'cook',  precedes: 'eat',    }
+  g.add { name: 'dishes', needs: 'eat',   precedes: 'sleep',  }
+  g.add { name: 'loner1',                                     }
+  g.add { name: 'loner2',                                     }
+  g.add { name: 'loner3',                                     }
+  g.add { name: 'sleep',                                      }
+  g.add { name: 'eat',    needs: [ 'cook', 'shop', ],         }
   #.........................................................................................................
   do ->
     result      = g.linearize()
@@ -54,17 +54,17 @@
   { Ltsort }  = require '../../../apps/ltsort'
   g           = new Ltsort()
   #.........................................................................................................
-  g.add { name: 'getup',                      before: '*',    }
-  g.add { name: 'brushteeth',                 before: '*',    }
-  g.add { name: 'shop',                       before: '*',    }
-  g.add { name: 'cook',                       before: 'eat',  }
-  g.add { name: 'serve',      after: 'cook',  before: 'eat',  }
-  g.add { name: 'dishes',     after: '*',                     }
-  g.add { name: 'loner1',                                     }
-  g.add { name: 'loner2',                                     }
-  g.add { name: 'loner3',                                     }
-  g.add { name: 'sleep',      after: '*',                     }
-  g.add { name: 'eat',        after: [ 'cook', 'shop', ],     }
+  g.add { name: 'getup',                      precedes: '*',    }
+  g.add { name: 'brushteeth',                 precedes: '*',    }
+  g.add { name: 'shop',                       precedes: '*',    }
+  g.add { name: 'cook',                       precedes: 'eat',  }
+  g.add { name: 'serve',      needs: 'cook',  precedes: 'eat',  }
+  g.add { name: 'dishes',     needs: '*',                       }
+  g.add { name: 'loner1',                                       }
+  g.add { name: 'loner2',                                       }
+  g.add { name: 'loner3',                                       }
+  g.add { name: 'sleep',      needs: '*',                       }
+  g.add { name: 'eat',        needs: [ 'cook', 'shop', ],       }
   #.........................................................................................................
   do ->
     result      = g.linearize()
@@ -77,10 +77,10 @@
   done?()
 ```
 
-* use `before` and `after` to indicate ordering relationships (its 'relatives')
+* use `precedes` and `needs` to indicate ordering relationships (its 'relatives')
 * both the named node and its relatives can be new or known to the graph being built (IOW one can use
   'forward references'; these nodes are implicitly created)
-* single names can use a string for `before` and `after`; multiple nodes must use several calls or a list of
+* single names can use a string for `precedes` and `needs`; multiple nodes must use several calls or a list of
   node names
 * nodes for which no explicit relatives are given are called 'loners'
 * call `g.linearize()` to get a list of node names according to their topological sort
@@ -97,21 +97,15 @@
     subtasks before proceding to the next group
 * the linearization of an empty graph is an empty list `[]`. The grouped linearization of an empty graph is
   a list with a single empty list `[[]]`. the empty list signifies 'no loners'.
-* use a star to denote when a node should come `before` or `after` all others
-  * using a star applies the ordering relation—`before` or `after`—to all known nodes except the current
-    one. Nodes that are added later may still come before one that was added earlier as `{ before: '*', }`
-    or after one added earlier as `{ after: '*', }`
-  * should there be more than one node with `{ before: '*', }`, later nodes will override earlier ones;
-    therefore, adding `{ name: 't1', before: '*', }`, `{ name: 't2', before: '*', }`, `{ name: 't3', before:
-    '*', }` to an empty graph will cause the first three places be occupied by `t3` on top, followed by
-    `t2`, and `t1`, in that order
-  * the same is true for `{ after: '*', }`
-* admittedly, while the use of the attribute names `before` and `after` is colloquial and unsurprising,
-  there's still room for misunderstanding; after all, when 'a comes *before* b' is true, then 'b comes
-  *after* a', so which one is it in `{ name: 'a', before 'b', }`? Does it mean 'here is an a, it comes
-  before b' or 'here is an a, before it there is b'? It's the former, so always think 'I come before x', 'I
-  come after y'. Another way to remember this is the (I find) rather intuitive meaning of `{ name: 'a',
-  before '*', }`, which means 'a comes before anything else'.
+* use a star to denote when a node `precedes` or `needs` all others
+  * using a star applies the ordering relation—`precedes` or `needs`—to all known nodes except the current
+    one. Nodes that are added later may still come before one that was added earlier as `{ precedes: '*', }`
+    or after one added earlier as `{ needs: '*', }`
+  * should there be more than one node with `{ precedes: '*', }`, later nodes will override earlier ones;
+    therefore, adding `{ name: 't1', precedes: '*', }`, `{ name: 't2', precedes: '*', }`, `{ name: 't3',
+    precedes: '*', }` to an empty graph will cause the first three places be occupied by `t3` on top,
+    followed by `t2`, and `t1`, in that order. The same is true for `{ needs: '*', }`.
+
 
 ## To Do
 
@@ -125,3 +119,5 @@
 
 * **[+]** support symbolic `*` star to mean 'before, after any other', as implemented in
 * **[+]** use more explicit `cfg` (named keys) API
+* **[+]** consider to rename `after` -> `needs` <del>or `follows`</del>, `before` -> <del>`needed_by`
+  or</del> `precedes`
