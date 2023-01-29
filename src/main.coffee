@@ -43,19 +43,19 @@ get_base_types = ->
   declare.lt_add_cfg
     fields:
       name:       'nonempty.text'
-      before:     'lt_nodelist'
-      after:      'lt_nodelist'
+      precedes:   'lt_nodelist'
+      needs:      'lt_nodelist'
     default:
       name:       null
-      before:     null
-      after:      null
+      precedes:     null
+      needs:      null
     create: ( x ) ->
       R           = x ? {}
       return R unless @isa.object R
-      R.after    ?= []
-      R.before   ?= []
-      R.after     = [ R.after,  ] unless @isa.list R.after
-      R.before    = [ R.before, ] unless @isa.list R.before
+      R.needs    ?= []
+      R.precedes   ?= []
+      R.needs       = [ R.needs,    ] unless @isa.list R.needs
+      R.precedes    = [ R.precedes, ] unless @isa.list R.precedes
       return R
   #.........................................................................................................
   declare.lt_linearize_cfg
@@ -75,7 +75,7 @@ class Ltsort
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
     GUY.props.hide @, 'types', get_base_types()
-    @cfg        = @types.create.lt_constructor_cfg cfg
+    @cfg = @types.create.lt_constructor_cfg cfg
     GUY.props.hide @, 'topograph', LTSORT.new_graph @cfg
     GUY.props.hide @, 'precedents',  {}
     return undefined
@@ -90,16 +90,16 @@ class Ltsort
   add: ( cfg ) ->
     cfg = @types.create.lt_add_cfg cfg
     #.......................................................................................................
-    if ( cfg.before.length is 0 ) and ( cfg.after.length is 0 )
+    if ( cfg.precedes.length is 0 ) and ( cfg.needs.length is 0 )
       return @_register cfg.name
     #.......................................................................................................
-    relatives = @_get_relatives cfg.name, cfg.after
+    relatives = @_get_relatives cfg.name, cfg.needs
     if relatives.length is 0
       @_register cfg.name
     else
       @_add relative, cfg.name for relative in relatives
     #.......................................................................................................
-    relatives = @_get_relatives cfg.name, cfg.before
+    relatives = @_get_relatives cfg.name, cfg.precedes
     if relatives.length is 0
       @_register cfg.name
     else
