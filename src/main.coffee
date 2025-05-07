@@ -41,7 +41,7 @@ get_base_types = ->
     create: ( x ) ->
       R           = x ? {}
       return R unless @isa.object R
-      R.needs    ?= []
+      R.needs      ?= []
       R.precedes   ?= []
       R.needs       = [ R.needs,    ] unless @isa.list R.needs
       R.precedes    = [ R.precedes, ] unless @isa.list R.precedes
