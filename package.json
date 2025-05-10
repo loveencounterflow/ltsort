@@ -1,6 +1,6 @@
 {
   "name": "ltsort",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "description": "Topological Sort with Support for Levels",
   "main": "lib/main.js",
   "scripts": {
