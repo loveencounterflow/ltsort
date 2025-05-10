@@ -11,13 +11,13 @@ njs_fs                    = require 'fs'
 GUY                       = require 'guy'
 # { debug }                 = GUY.trm.get_loggers 'LTSORT'
 { rpr }                   = GUY.trm
-@types                    = new ( require 'intertype' ).Intertype()
-{ isa }                   = @types
+{ CT, \
+  std                 }   = require 'cleartype'
 
 
 #-----------------------------------------------------------------------------------------------------------
 @new_graph = ( settings ) ->
-  return @_copy settings if ( isa.object settings ) and ( settings[ '~isa' ] is 'LTSORT/graph' )
+  return @_copy settings if ( CT.isa std.object, settings ) and ( settings[ '~isa' ] is 'LTSORT/graph' )
   settings ?= {}
   R =
     '~isa':       'LTSORT/graph'
@@ -36,7 +36,7 @@ GUY                       = require 'guy'
 @populate = ( me, elements ) ->
   #.........................................................................................................
   for element in elements
-    if isa.text element
+    if CT.isa std.text, element
       @add me, element
     else
       [ a, b, ] = element

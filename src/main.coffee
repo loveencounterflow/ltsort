@@ -7,53 +7,79 @@ GUY                       = require 'guy'
 # { debug }                 = GUY.trm.get_loggers 'LTSORT'
 # { rpr }                   = GUY.trm
 #...........................................................................................................
-{ Intertype }             = require 'intertype'
+{ CT, \
+  std                 }   = require 'cleartype'
 LTSORT                    = require './legacy'
-base_types                = null
+lt_types                  = null
 
 
 #===========================================================================================================
 #
 #-----------------------------------------------------------------------------------------------------------
-get_base_types = ->
-  return base_types if base_types?
+get_lt_types = ->
+  return lt_types if lt_types?
   #.........................................................................................................
-  base_types                = new Intertype()
-  { declare }               = base_types
+  lt_types =
+    #.......................................................................................................
+    lt_nodelist:
+      $isa: ( x ) ->
+        # 'list.of.nonempty.text'
+        return false unless @ct.isa std.list, x
+        return x.every ( e ) => @ct.isa std.nonempty_text, e
+      $create: ( x ) ->
+        return x if x?
+        return []
+    #.......................................................................................................
+    lt_constructor_cfg:
+      $isa: ( x ) ->
+        return false unless @ct.isa std.object, x
+        return false unless @ct.isa @me.loners, x.loners
+        return true
+      loners:
+        $isa:       ( x ) -> @ct.isa std.boolean, x
+      $template:
+        loners:     true
+      $create: ( x ) ->
+        return x unless @ct.isa_optional std.object, x
+        return { @me.$template..., x..., }
+    #.......................................................................................................
+    lt_add_cfg:
+      $isa: ( x ) ->
+        return false unless @ct.isa std.object,   x
+        return false unless @ct.isa @me.name,     x.name
+        return false unless @ct.isa @me.precedes, x.precedes
+        return false unless @ct.isa @me.needs,    x.needs
+        return true
+      $create: ( x ) ->
+        return x unless @ct.isa_optional std.object, x
+        R           = { @me.$template..., precedes: [], needs: [], x..., }
+        R.needs     = [ R.needs,    ] if @ct.isa std.text, R.needs
+        R.precedes  = [ R.precedes, ] if @ct.isa std.text, R.precedes
+        return R
+      #.....................................................................................................
+      name:         $isa: ( x ) -> @ct.isa std.nonempty_text,             x
+      precedes:     $isa: ( x ) -> @ct.isa_optional lt_types.lt_nodelist, x
+      needs:        $isa: ( x ) -> @ct.isa_optional lt_types.lt_nodelist, x
+      $template:
+        name:       null
+        precedes:   null
+        needs:      null
+    #.......................................................................................................
+    lt_linearize_cfg:
+      $isa: ( x ) ->
+        return false unless @ct.isa std.object, x
+        return false unless @ct.isa @me.groups, x.groups
+        return true
+      $create: ( x ) ->
+        return x unless @ct.isa_optional std.object, x
+        return { @me.$template..., x..., }
+      #.....................................................................................................
+      groups:
+        $isa:       ( x ) -> @ct.isa std.boolean, x
+      $template:
+        groups:     false
   #.........................................................................................................
-  declare.lt_nodelist 'list.of.nonempty.text'
-  #.........................................................................................................
-  declare.lt_constructor_cfg
-    fields:
-      loners:     'boolean'
-    default:
-      loners:     true
-  #.........................................................................................................
-  declare.lt_add_cfg
-    fields:
-      name:       'nonempty.text'
-      precedes:   'lt_nodelist'
-      needs:      'lt_nodelist'
-    default:
-      name:       null
-      precedes:     null
-      needs:      null
-    create: ( x ) ->
-      R           = x ? {}
-      return R unless @isa.object R
-      R.needs      ?= []
-      R.precedes   ?= []
-      R.needs       = [ R.needs,    ] unless @isa.list R.needs
-      R.precedes    = [ R.precedes, ] unless @isa.list R.precedes
-      return R
-  #.........................................................................................................
-  declare.lt_linearize_cfg
-    fields:
-      groups:     'boolean'
-    default:
-      groups:     false
-  #.........................................................................................................
-  return base_types
+  return lt_types
 
 
 #===========================================================================================================
@@ -63,8 +89,8 @@ class Ltsort
 
   #---------------------------------------------------------------------------------------------------------
   constructor: ( cfg ) ->
-    GUY.props.hide @, 'types', get_base_types()
-    @cfg = @types.create.lt_constructor_cfg cfg
+    GUY.props.hide @, 'lt_types', get_lt_types()
+    @cfg = CT.create @lt_types.lt_constructor_cfg, cfg
     GUY.props.hide @, 'topograph', LTSORT.new_graph @cfg
     GUY.props.hide @, 'precedents',  {}
     return undefined
@@ -77,7 +103,7 @@ class Ltsort
 
   #---------------------------------------------------------------------------------------------------------
   add: ( cfg ) ->
-    cfg = @types.create.lt_add_cfg cfg
+    cfg = CT.create @lt_types.lt_add_cfg, cfg
     #.......................................................................................................
     if ( cfg.precedes.length is 0 ) and ( cfg.needs.length is 0 )
       return @_register cfg.name
@@ -120,7 +146,7 @@ class Ltsort
 
   #---------------------------------------------------------------------------------------------------------
   linearize: ( cfg ) ->
-    cfg = @types.create.lt_linearize_cfg cfg
+    cfg = CT.create @lt_types.lt_linearize_cfg, cfg
     @_finalize()
     return LTSORT.group @topograph if cfg.groups
     return LTSORT.linearize @topograph
