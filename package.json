@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/loveencounterflow/ltsort",
   "dependencies": {
-    "guy": "^12.7.0",
-    "intertype": "0.111.0"
+    "cleartype": "^0.0.6",
+    "guy": "^14.2.0"
   }
 }
